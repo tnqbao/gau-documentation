@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* High contrast light theme - white and light blue dominant */
+    --background: 0 0% 100%;
+    --foreground: 210 40% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 40% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 8%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 210 40% 10%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 210 20% 45%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 210 40% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 40% 88%;
+    --input: 210 40% 94%;
+    --ring: 210 100% 50%;
+    --radius: 0.75rem;
+    --chart-1: 210 100% 50%;
+    --chart-2: 200 100% 45%;
+    --chart-3: 190 100% 40%;
+    --chart-4: 220 100% 55%;
+    --chart-5: 180 100% 35%;
+  }
+
+  .dark {
+    /* High contrast dark theme - pure black dominant */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 210 40% 5%;
+    --card-foreground: 0 0% 98%;
+    --popover: 210 40% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 210 100% 60%;
+    --primary-foreground: 0 0% 3%;
+    --secondary: 210 40% 10%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 210 40% 10%;
+    --muted-foreground: 210 20% 65%;
+    --accent: 210 40% 12%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 40% 15%;
+    --input: 210 40% 12%;
+    --ring: 210 100% 60%;
+    --chart-1: 210 100% 60%;
+    --chart-2: 200 100% 55%;
+    --chart-3: 190 100% 50%;
+    --chart-4: 220 100% 65%;
+    --chart-5: 180 100% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Enhanced typography with better contrast */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-foreground;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+
+  /* High contrast scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-3;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/70 rounded-full hover:bg-primary;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+  }
+
+  /* Custom gradient classes for high contrast */
+  .gradient-blue {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(210 100% 60%) 100%);
+  }
+
+  .gradient-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .gradient-orange {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  }
+
+  .gradient-purple {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, #8b5cf6 100%);
+  }
+
+  /* Enhanced card shadows for better depth */
+  .enhanced-shadow {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .dark .enhanced-shadow {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  }
+}

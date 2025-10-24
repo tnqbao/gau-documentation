@@ -1,0 +1,364 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "products": "Products",
+    "diagram": "Infrastructure Diagram",
+    "architecture": "Architecture",
+    "technology": "Technology",
+    "services": "Services",
+    "api": "API Reference"
+  },
+  "common": {
+    "version": "Version",
+    "status": "Status",
+    "port": "Port",
+    "repository": "Repository",
+    "tech": "Technology",
+    "description": "Description",
+    "active": "Active",
+    "development": "Development",
+    "planned": "Planned",
+    "viewRepository": "View Repository",
+    "external": "External",
+    "internal": "Internal",
+    "cluster": "Cluster",
+    "communication": "Communication",
+    "management": "Management",
+    "processing": "Processing",
+    "security": "Security",
+    "monitoring": "Monitoring",
+    "storage": "Storage"
+  },
+  "home": {
+    "title": "Gau Microservices System Documentation",
+    "subtitle": "Modern microservices system built with Go, Node.js, K3s and cloud-native technologies. Provides comprehensive solutions for user management, authorization, file uploads, and email services.",
+    "servicesOverview": "Services Overview",
+    "servicesDescription": "The system includes {count} main microservices, each service handles a specific function and can scale independently.",
+    "techStack": "Tech Stack",
+    "techStackDescription": "Technologies used in the system",
+    "infrastructureOverview": "Infrastructure",
+    "infrastructureDescription": "Infrastructure components supporting the system"
+  },
+  "products": {
+    "title": "Applied Products",
+    "subtitle": "Products deployed on K3s microservices infrastructure",
+    "gauPhim": {
+      "title": "Gau Phim - Movie Streaming Platform",
+      "description": "A modern online movie viewing platform built on K3s infrastructure with high scalability",
+      "about": "About Gau Phim",
+      "featuresTitle": "Key Features",
+      "techImplementation": "Technical Infrastructure",
+      "screenshots": "Screenshots & Demo",
+      "experience": "Experience Now",
+      "visit": "Visit Gau Phim",
+      "officialWebsite": "Official Website",
+      "liveFromWebsite": "Live from website",
+      "accessWebsite": "Access website",
+      "techImplementationTitle": "Technical Implementation",
+      "servicesUsed": "Services Used",
+      "screenshotsSection": "Screenshots",
+      "demoSection": "Demo & Preview",
+      "features": {
+        "4kStreaming": "4K Quality Streaming",
+        "offlineDownload": "Offline Download",
+        "multiDevice": "Multi-device Support",
+        "noAds": "Ad-free Experience",
+        "multiLanguageSubtitle": "Multi-language Subtitles"
+      },
+      "services": {
+        "cdnService": "CDN Service",
+        "accountService": "Account Service",
+        "authService": "Auth Service",
+        "emailService": "Email Service"
+      },
+      "techDetails": {
+        "containerOrchestration": "Container orchestration",
+        "scalableArchitecture": "Scalable architecture",
+        "globalContentDelivery": "Global content delivery",
+        "userAuthentication": "User authentication",
+        "emailNotifications": "Email notifications"
+      },
+      "screenshotsTitle": "Screenshots from Website",
+      "screenshots": {
+        "homepage": {
+          "title": "Homepage - Main Interface",
+          "description": "Main screen with hot movie listings and intuitive user interface"
+        },
+        "movieDetail": {
+          "title": "Movie Page - Details",
+          "description": "Detailed movie information page with trailer, cast information and reviews"
+        },
+        "videoPlayer": {
+          "title": "Video Player",
+          "description": "Movie viewing interface with full controls and HD/4K quality"
+        }
+      },
+      "screenshotsNote": "Click on images for details or visit the website for full experience",
+      "performanceStats": "Performance Statistics",
+      "responseTime": "Response Time",
+      "userSatisfaction": "User Satisfaction"
+    }
+  },
+  "services": {
+    "title": "Microservices",
+    "description": "List of microservices in the Gau system",
+    "viewRepository": "View Repository",
+    "accounts": {
+      "name": "Account Service",
+      "description": "Manages user accounts, authentication, registration, user profiles"
+    },
+    "authorization": {
+      "name": "Authorization Service",
+      "description": "Manages permissions, access control and token management"
+    },
+    "cdn": {
+      "name": "CDN Service",
+      "description": "Manages CDN and image processing"
+    },
+    "upload": {
+      "name": "Upload Service",
+      "description": "Manages file and media uploads"
+    },
+    "email": {
+      "name": "Email Service",
+      "description": "Sends emails, notifications and email verification"
+    }
+  },
+  "infrastructure": {
+    "title": "Infrastructure Diagram",
+    "subtitle": "Detailed infrastructure diagram from outside to inside - Homelab to Microservices",
+    "overview": "Infrastructure Architecture Overview",
+    "physicalLayer": "Physical Layer",
+    "networkLayer": "Network Layer",
+    "orchestrationLayer": "Orchestration Layer",
+    "applicationLayer": "Application Layer",
+    "physicalInfrastructure": "Physical Infrastructure Layer",
+    "applicationInfrastructure": "Application Infrastructure Layer (K3s)",
+    "dataFlow": "Infrastructure Data Flow",
+    "fromOutsideIn": "From Outside to Inside",
+    "serviceCommunication": "Detailed Service Communication Flow",
+    "requestJourney": "Request Journey through K3s Cluster",
+    "homelab": "Physical Homelab",
+    "proxmoxDescription": "Physical server running Proxmox VE",
+    "debianVms": "6 Debian VMs",
+    "debianDescription": "1 Master + 5 Worker nodes, connected via Tailscale VPN",
+    "k3sCluster": "K3s Kubernetes Cluster",
+    "k3sDescription": "Container orchestration on VMs",
+    "applicationServices": "Application Services",
+    "servicesDescription": "Microservices, databases, monitoring stack",
+    "physicalInfrastructureDiagram": "Physical Infrastructure Diagram",
+    "tailscaleVpnMesh": "Tailscale VPN Mesh Network",
+    "vpnFeatures": "VPN Network Features:",
+    "vpnBenefits": "Benefits:",
+    "clusterArchitecture": "K3s Cluster Architecture - Service Communication via Cluster IPs",
+    "clusterDescription": "Microservices communicate internally via Kubernetes cluster IPs and service discovery",
+    "externalLayer": "External Layer",
+    "publicInternet": "Public Internet & CDN",
+    "clientApps": "Client Applications",
+    "webMobileApis": "Web, Mobile, APIs",
+    "externalAccess": "External Access",
+    "cloudflareCdn": "Cloudflare CDN",
+    "globalEdge": "Global Edge Network",
+    "edgeCaching": "Edge Caching",
+    "loadBalancer": "Load Balancer",
+    "trafficDistribution": "Traffic Distribution",
+    "httpsTraffic": "HTTPS Traffic",
+    "internalNetwork": "Internal Network (Cluster IP Communication)",
+    "apiGatewayLayer": "API Gateway Layer",
+    "apiGateway": "API Gateway",
+    "routesToServices": "Routes to Services",
+    "servicesMesh": "Microservices Mesh - Cluster IP Communication",
+    "userManagement": "User Management",
+    "jwtOauth": "JWT & OAuth",
+    "contentDelivery": "Content Delivery",
+    "fileHandling": "File Handling",
+    "notifications": "Notifications",
+    "internalServiceDiscovery": "Internal Service Discovery & Communication",
+    "dnsResolution": "DNS Resolution",
+    "autoLoadBalancing": "Automatic traffic distribution",
+    "serviceMesh": "Service Mesh",
+    "secureInterService": "Secure inter-service communication",
+    "jwtValidation": "JWT Validation",
+    "fileProcessing": "File Processing",
+    "sendNotifications": "Send Notifications",
+    "dataStorageLayer": "Data & Storage Layer",
+    "primaryDatabase": "Primary Database",
+    "acidCompliance": "ACID Compliance",
+    "readReplicas": "Read Replicas",
+    "cacheSessions": "Cache & Sessions",
+    "inMemory": "In-Memory",
+    "subMsLatency": "Sub-ms Latency",
+    "messageQueue": "Message Queue",
+    "eventDriven": "Event-Driven",
+    "asyncProcessing": "Async Processing",
+    "monitoring": "Monitoring",
+    "observability": "Observability",
+    "externalStorage": "External Storage",
+    "cloudStorageIntegration": "Cloud Storage Integration",
+    "cloudflareR2": "Cloudflare R2",
+    "s3Compatible": "S3-Compatible",
+    "objectStorage": "Object Storage",
+    "globalCdn": "Global CDN",
+    "components": {
+      "homelabPhysical": "Physical Homelab",
+      "homelabPhysicalDesc": "Physical homelab infrastructure running Proxmox VE",
+      "homelabPhysicalDetails": "Physical server running Proxmox Virtual Environment for VM management",
+      "proxmoxVe": "Proxmox VE",
+      "proxmoxVeDesc": "Open-source virtualization platform managing 6 Debian Linux VMs",
+      "proxmoxVeDetails": "Type-1 hypervisor providing web interface for VM and container management",
+      "debianVms": "6 Debian VMs",
+      "debianVmsDesc": "1 Master Node + 5 Agent Nodes forming K3s cluster",
+      "debianVmsDetails": "Debian Linux VMs configured as nodes in K3s Kubernetes cluster",
+      "tailscaleVpn": "Tailscale VPN",
+      "tailscaleVpnDesc": "Virtual private network connecting all nodes together",
+      "tailscaleVpnDetails": "WireGuard-based VPN creating secure mesh network between VMs"
+    },
+    "vpnFeaturesList": {
+      "meshNetwork": "Point-to-point mesh network",
+      "wireguardEncryption": "WireGuard encryption",
+      "natTraversal": "Automatic NAT traversal",
+      "zeroConfig": "Zero-config networking"
+    },
+    "vpnBenefitsList": {
+      "secureConnection": "Secure connection between nodes",
+      "noComplexFirewall": "No complex firewall configuration needed",
+      "easyNodeManagement": "Easy to add/remove nodes",
+      "centralizedManagement": "Centralized management via web console"
+    }
+  },
+  "techStacks": {
+    "backend": "Backend",
+    "database": "Database",
+    "messagequeue": "Message Queue",
+    "storage": "Storage",
+    "containerorchestration": "Container & Orchestration",
+    "monitoringlogging": "Monitoring & Logging",
+    "authentication": "Authentication",
+    "descriptions": {
+      "go": "Main language for microservices",
+      "gin": "Web framework for Go",
+      "nodejs": "Runtime for Email Service",
+      "typescript": "Language for Email Service",
+      "postgresql": "Main database for services",
+      "redis": "Cache and session storage",
+      "rabbitmq": "Message broker for async communication",
+      "cloudflareR2": "S3-compatible object storage",
+      "docker": "Container platform",
+      "k3s": "Lightweight Kubernetes distribution",
+      "grafana": "Visualization and dashboards",
+      "loki": "Log aggregation system",
+      "tempo": "Distributed tracing backend",
+      "prometheus": "Metrics collection and alerting",
+      "jwt": "JSON Web Token for authentication"
+    }
+  },
+  "api": {
+    "title": "API Reference",
+    "description": "API documentation for all microservices",
+    "baseUrl": "Base URL",
+    "endpoints": "Endpoints"
+  },
+  "architecture": {
+    "title": "System Architecture",
+    "description": "Description of microservices architecture and how services interact with each other",
+    "microservicesTitle": "Microservices Architecture Principles",
+    "microservicesDescription": "Our system follows Domain-Driven Design (DDD) principles with each microservice owning its domain and data.",
+    "serviceIndependence": "Service Independence",
+    "communicationPatterns": "Communication Patterns",
+    "serviceDomainBreakdown": "Service Domain Breakdown",
+    "serviceIndependencePoints": {
+      "dedicatedDatabase": "Each service has its own dedicated database",
+      "independentDeployment": "Independent deployment and scaling",
+      "technologyFlexibility": "Technology stack flexibility per service",
+      "faultIsolation": "Fault isolation and resilience",
+      "teamOwnership": "Team ownership and autonomy"
+    },
+    "communicationPoints": {
+      "restApis": "REST APIs for synchronous communication",
+      "rabbitmq": "RabbitMQ for asynchronous messaging",
+      "eventDriven": "Event-driven architecture for loose coupling",
+      "circuitBreaker": "Circuit breaker pattern for resilience",
+      "serviceDiscovery": "Service discovery and load balancing"
+    },
+    "domains": {
+      "account": {
+        "title": "Account Domain",
+        "subtitle": "User Management",
+        "features": {
+          "registration": "User registration & profiles",
+          "authentication": "Authentication & login",
+          "verification": "Account verification",
+          "passwordMgmt": "Password management"
+        }
+      },
+      "authorization": {
+        "title": "Authorization Domain",
+        "subtitle": "Access Control",
+        "features": {
+          "rbac": "Role-based access control",
+          "jwtManagement": "JWT token management",
+          "permissionValidation": "Permission validation",
+          "apiGatewaySecurity": "API gateway security"
+        }
+      },
+      "content": {
+        "title": "Content Domain",
+        "subtitle": "Media Management",
+        "features": {
+          "fileUploads": "File uploads & processing",
+          "cdnIntegration": "CDN integration",
+          "imageOptimization": "Image optimization",
+          "storageManagement": "Storage management"
+        }
+      },
+      "communication": {
+        "title": "Communication Domain",
+        "subtitle": "Messaging",
+        "features": {
+          "emailDelivery": "Email delivery & templates",
+          "notifications": "Push notifications",
+          "messageQueues": "Message queue processing",
+          "eventBroadcasting": "Event broadcasting"
+        }
+      }
+    },
+    "dataFlowPatterns": "Data Flow & Integration Patterns",
+    "databasePerService": {
+      "title": "Database Per Service",
+      "description": "Each microservice maintains its own database to ensure data autonomy and prevent tight coupling between services.",
+      "badges": {
+        "dataIsolation": "Data Isolation"
+      }
+    },
+    "apiGateway": {
+      "title": "API Gateway Pattern",
+      "description": "Centralized entry point for all client requests with routing, authentication, rate limiting, and monitoring.",
+      "badges": {
+        "loadBalancing": "Load Balancing",
+        "rateLimiting": "Rate Limiting",
+        "sslTermination": "SSL Termination"
+      }
+    },
+    "eventDriven": {
+      "title": "Event-Driven Communication",
+      "description": "Asynchronous messaging using RabbitMQ for loose coupling and improved system resilience.",
+      "badges": {
+        "eventSourcing": "Event Sourcing",
+        "messageQueues": "Message Queues"
+      }
+    },
+    "securityMonitoring": {
+      "title": "Security & Monitoring",
+      "description": "Comprehensive security with JWT tokens, role-based access control, and real-time monitoring.",
+      "badges": {
+        "jwtAuth": "JWT Auth",
+        "rbac": "RBAC",
+        "observability": "Observability"
+      }
+    }
+  },
+  "technology": {
+    "title": "Technology",
+    "description": "Technologies used in the system"
+  }
+}

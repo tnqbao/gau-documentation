@@ -1,0 +1,364 @@
+{
+  "nav": {
+    "overview": "Tổng quan",
+    "products": "Sản phẩm",
+    "diagram": "Sơ đồ Hạ tầng",
+    "architecture": "Kiến trúc",
+    "technology": "Công nghệ",
+    "services": "Services",
+    "api": "API Reference"
+  },
+  "common": {
+    "version": "Phiên bản",
+    "status": "Trạng thái",
+    "port": "Cổng",
+    "repository": "Repository",
+    "tech": "Công nghệ",
+    "description": "Mô tả",
+    "active": "Hoạt động",
+    "development": "Phát triển",
+    "planned": "Kế hoạch",
+    "viewRepository": "Xem Repository",
+    "external": "Bên ngoài",
+    "internal": "Nội bộ",
+    "cluster": "Cụm",
+    "communication": "Giao tiếp",
+    "management": "Quản lý",
+    "processing": "Xử lý",
+    "security": "Bảo mật",
+    "monitoring": "Giám sát",
+    "storage": "Lưu trữ"
+  },
+  "home": {
+    "title": "Tài liệu Hệ thống Microservices Gau",
+    "subtitle": "Hệ thống microservices hiện đại được xây dựng với Go, Node.js, K3s và các công nghệ cloud-native. Cung cấp giải pháp toàn diện cho quản lý người dùng, phân quyền, upload files, và email services.",
+    "servicesOverview": "Tổng quan Services",
+    "servicesDescription": "Hệ thống bao gồm {count} microservices chính, mỗi service đảm nhận một chức năng cụ thể và có thể scale độc lập.",
+    "techStack": "Tech Stack",
+    "techStackDescription": "Công nghệ được sử dụng trong hệ thống",
+    "infrastructureOverview": "Hạ tầng",
+    "infrastructureDescription": "Thành phần hạ tầng hỗ trợ hệ thống"
+  },
+  "products": {
+    "title": "Sản phẩm ứng dụng",
+    "subtitle": "Các sản phẩm đã được triển khai trên hạ tầng K3s microservices",
+    "gauPhim": {
+      "title": "Gấu Phim - Nền tảng Streaming Phim",
+      "description": "Một nền tảng xem phim trực tuyến hiện đại được xây dựng trên hạ tầng K3s với khả năng mở rộng cao",
+      "about": "Về Gấu Phim",
+      "featuresTitle": "Tính năng nổi bật",
+      "techImplementation": "Hạ tầng kỹ thuật",
+      "screenshots": "Screenshots & Demo",
+      "experience": "Trải nghiệm ngay",
+      "visit": "Truy cập Gấu Phim",
+      "officialWebsite": "Website chính thức",
+      "liveFromWebsite": "Trực tiếp từ website",
+      "accessWebsite": "Truy cập website",
+      "techImplementationTitle": "Triển khai kỹ thuật",
+      "servicesUsed": "Services sử dụng",
+      "screenshotsSection": "Hình ảnh",
+      "demoSection": "Demo & Xem trước",
+      "features": {
+        "4kStreaming": "Streaming chất lượng 4K",
+        "offlineDownload": "Tải xuống offline",
+        "multiDevice": "Đa thiết bị",
+        "noAds": "Không quảng cáo",
+        "multiLanguageSubtitle": "Subtitle đa ngôn ngữ"
+      },
+      "services": {
+        "cdnService": "CDN Service",
+        "accountService": "Account Service",
+        "authService": "Auth Service",
+        "emailService": "Email Service"
+      },
+      "techDetails": {
+        "containerOrchestration": "Container orchestration",
+        "scalableArchitecture": "Scalable architecture",
+        "globalContentDelivery": "Global content delivery",
+        "userAuthentication": "User authentication",
+        "emailNotifications": "Email notifications"
+      },
+      "screenshotsTitle": "Screenshots từ Website",
+      "screenshots": {
+        "homepage": {
+          "title": "Trang chủ - Giao diện chính",
+          "description": "Màn hình chính với danh sách phim hot và giao diện người dùng trực quan"
+        },
+        "movieDetail": {
+          "title": "Trang phim - Chi tiết",
+          "description": "Trang thông tin chi tiết phim với trailer, thông tin diễn viên và đánh giá"
+        },
+        "videoPlayer": {
+          "title": "Trình phát video",
+          "description": "Giao diện xem phim với điều khiển đầy đủ và chất lượng HD/4K"
+        }
+      },
+      "screenshotsNote": "Click vào các ảnh để xem chi tiết hoặc truy cập website để trải nghiệm trực tiếp",
+      "performanceStats": "Thống kê hiệu năng",
+      "responseTime": "Thời gian phản hồi",
+      "userSatisfaction": "Hài lòng người dùng"
+    }
+  },
+  "services": {
+    "title": "Microservices",
+    "description": "Danh sách các microservices trong hệ thống Gau",
+    "viewRepository": "Xem Repository",
+    "accounts": {
+      "name": "Account Service",
+      "description": "Quản lý tài khoản người dùng, xác thực, đăng ký, hồ sơ người dùng"
+    },
+    "authorization": {
+      "name": "Authorization Service",
+      "description": "Quản lý phân quyền, kiểm soát truy cập và quản lý token"
+    },
+    "cdn": {
+      "name": "CDN Service",
+      "description": "Quản lý CDN và xử lý hình ảnh"
+    },
+    "upload": {
+      "name": "Upload Service",
+      "description": "Quản lý upload file và media"
+    },
+    "email": {
+      "name": "Email Service",
+      "description": "Gửi email, thông báo và xác thực email"
+    }
+  },
+  "infrastructure": {
+    "title": "Sơ đồ Hạ tầng",
+    "subtitle": "Sơ đồ chi tiết hạ tầng từ ngoài vào trong - Homelab đến Microservices",
+    "overview": "Tổng quan Kiến trúc Hạ tầng",
+    "physicalLayer": "Lớp Vật Lý",
+    "networkLayer": "Lớp Mạng",
+    "orchestrationLayer": "Lớp Orchestration",
+    "applicationLayer": "Lớp Ứng dụng",
+    "physicalInfrastructure": "Lớp Hạ tầng Vật lý",
+    "applicationInfrastructure": "Lớp Hạ tầng Ứng dụng (K3s)",
+    "dataFlow": "Luồng Dữ liệu Hạ tầng",
+    "fromOutsideIn": "Từ Ngoài vào Trong",
+    "serviceCommunication": "Luồng Giao tiếp Service Chi tiết",
+    "requestJourney": "Hành trình Request qua K3s Cluster",
+    "homelab": "Homelab Vật lý",
+    "proxmoxDescription": "Máy chủ vật lý chạy Proxmox VE",
+    "debianVms": "6 Máy Ảo Debian",
+    "debianDescription": "1 Master + 5 Worker nodes, kết nối qua Tailscale VPN",
+    "k3sCluster": "K3s Kubernetes Cluster",
+    "k3sDescription": "Container orchestration trên các VMs",
+    "applicationServices": "Application Services",
+    "servicesDescription": "Microservices, databases, monitoring stack",
+    "physicalInfrastructureDiagram": "Sơ đồ Hạ tầng Vật lý",
+    "tailscaleVpnMesh": "Mạng Mesh VPN Tailscale",
+    "vpnFeatures": "Đặc điểm mạng VPN:",
+    "vpnBenefits": "Lợi ích:",
+    "clusterArchitecture": "Kiến trúc K3s Cluster - Giao tiếp Service qua Cluster IPs",
+    "clusterDescription": "🚀 Microservices giao tiếp nội bộ qua Kubernetes cluster IPs và service discovery",
+    "externalLayer": "Lớp Bên ngoài",
+    "publicInternet": "Internet Công cộng & CDN",
+    "clientApps": "Ứng dụng Client",
+    "webMobileApis": "Web, Mobile, APIs",
+    "externalAccess": "Truy cập Bên ngoài",
+    "cloudflareCdn": "Cloudflare CDN",
+    "globalEdge": "Mạng Edge Toàn cầu",
+    "edgeCaching": "Edge Caching",
+    "loadBalancer": "Load Balancer",
+    "trafficDistribution": "Phân phối Traffic",
+    "httpsTraffic": "HTTPS Traffic",
+    "internalNetwork": "Mạng Nội bộ (Giao tiếp Cluster IP)",
+    "apiGatewayLayer": "Lớp API Gateway",
+    "apiGateway": "API Gateway",
+    "routesToServices": "Định tuyến đến Services",
+    "servicesMesh": "Microservices Mesh - Giao tiếp Cluster IP",
+    "userManagement": "Quản lý Người dùng",
+    "jwtOauth": "JWT & OAuth",
+    "contentDelivery": "Phân phối Nội dung",
+    "fileHandling": "Xử lý File",
+    "notifications": "Thông báo",
+    "internalServiceDiscovery": "Service Discovery & Giao tiếp Nội bộ",
+    "dnsResolution": "Phân giải DNS",
+    "autoLoadBalancing": "Phân phối traffic tự động",
+    "serviceMesh": "Service Mesh",
+    "secureInterService": "Giao tiếp inter-service an toàn",
+    "jwtValidation": "Xác thực JWT",
+    "fileProcessing": "Xử lý File",
+    "sendNotifications": "Gửi Thông báo",
+    "dataStorageLayer": "Lớp Dữ liệu & Lưu trữ",
+    "primaryDatabase": "Database Chính",
+    "acidCompliance": "ACID Compliance",
+    "readReplicas": "Read Replicas",
+    "cacheSessions": "Cache & Sessions",
+    "inMemory": "In-Memory",
+    "subMsLatency": "Sub-ms Latency",
+    "messageQueue": "Message Queue",
+    "eventDriven": "Event-Driven",
+    "asyncProcessing": "Async Processing",
+    "monitoring": "Giám sát",
+    "observability": "Khả năng quan sát",
+    "externalStorage": "Lưu trữ Bên ngoài",
+    "cloudStorageIntegration": "Tích hợp Cloud Storage",
+    "cloudflareR2": "Cloudflare R2",
+    "s3Compatible": "S3-Compatible",
+    "objectStorage": "Object Storage",
+    "globalCdn": "CDN Toàn cầu",
+    "components": {
+      "homelabPhysical": "Homelab Vật Lý",
+      "homelabPhysicalDesc": "Hạ tầng vật lý tại nhà với máy chủ chạy Proxmox VE",
+      "homelabPhysicalDetails": "Máy chủ vật lý cài đặt Proxmox Virtual Environment để quản lý máy ảo",
+      "proxmoxVe": "Proxmox VE",
+      "proxmoxVeDesc": "Nền tảng ảo hóa mã nguồn mở quản lý 6 máy ảo Debian Linux",
+      "proxmoxVeDetails": "Hypervisor Type-1 cung cấp giao diện web để quản lý máy ảo và container",
+      "debianVms": "6 Máy Ảo Debian",
+      "debianVmsDesc": "1 Master Node + 5 Agent Nodes tạo thành K3s cluster",
+      "debianVmsDetails": "Các máy ảo Debian Linux được cấu hình làm các node trong K3s Kubernetes cluster",
+      "tailscaleVpn": "Tailscale VPN",
+      "tailscaleVpnDesc": "Mạng riêng ảo kết nối tất cả các node với nhau",
+      "tailscaleVpnDetails": "WireGuard-based VPN tạo mesh network an toàn giữa các máy ảo"
+    },
+    "vpnFeaturesList": {
+      "meshNetwork": "Mạng mesh point-to-point",
+      "wireguardEncryption": "WireGuard encryption",
+      "natTraversal": "NAT traversal tự động",
+      "zeroConfig": "Zero-config networking"
+    },
+    "vpnBenefitsList": {
+      "secureConnection": "Kết nối an toàn giữa các node",
+      "noComplexFirewall": "Không cần cấu hình firewall phức tạp",
+      "easyNodeManagement": "Dễ dàng thêm/xóa node",
+      "centralizedManagement": "Quản lý tập trung qua web console"
+    }
+  },
+  "techStacks": {
+    "backend": "Backend",
+    "database": "Database",
+    "messagequeue": "Message Queue",
+    "storage": "Storage",
+    "containerorchestration": "Container & Orchestration",
+    "monitoringlogging": "Monitoring & Logging",
+    "authentication": "Authentication",
+    "descriptions": {
+      "go": "Ngôn ngữ chính cho microservices",
+      "gin": "Web framework cho Go",
+      "nodejs": "Runtime cho Email Service",
+      "typescript": "Ngôn ngữ cho Email Service",
+      "postgresql": "Database chính cho các service",
+      "redis": "Cache và session storage",
+      "rabbitmq": "Message broker cho async communication",
+      "cloudflareR2": "S3-compatible object storage",
+      "docker": "Container platform",
+      "k3s": "Lightweight Kubernetes distribution",
+      "grafana": "Visualization và dashboards",
+      "loki": "Log aggregation system",
+      "tempo": "Distributed tracing backend",
+      "prometheus": "Metrics collection và alerting",
+      "jwt": "JSON Web Token cho authentication"
+    }
+  },
+  "api": {
+    "title": "API Reference",
+    "description": "Tài liệu API cho tất cả các microservices",
+    "baseUrl": "Base URL",
+    "endpoints": "Endpoints"
+  },
+  "architecture": {
+    "title": "Kiến trúc Hệ thống",
+    "description": "Mô tả kiến trúc microservices và cách các service tương tác với nhau",
+    "microservicesTitle": "Nguyên tắc Kiến trúc Microservices",
+    "microservicesDescription": "Hệ thống của chúng tôi tuân theo các nguyên tắc Domain-Driven Design (DDD) với mỗi microservice sở hữu domain và dữ liệu riêng.",
+    "serviceIndependence": "Tính độc lập của Service",
+    "communicationPatterns": "Mô hình giao tiếp",
+    "serviceDomainBreakdown": "Phân chia Domain theo Service",
+    "serviceIndependencePoints": {
+      "dedicatedDatabase": "Mỗi service có database riêng biệt",
+      "independentDeployment": "Triển khai và mở rộng độc lập",
+      "technologyFlexibility": "Linh hoạt technology stack cho từng service",
+      "faultIsolation": "Cách ly lỗi và khả năng phục hồi",
+      "teamOwnership": "Quyền sở hữu và tự chủ của team"
+    },
+    "communicationPoints": {
+      "restApis": "REST APIs cho giao tiếp đồng bộ",
+      "rabbitmq": "RabbitMQ cho messaging bất đồng bộ",
+      "eventDriven": "Kiến trúc hướng sự kiện cho loose coupling",
+      "circuitBreaker": "Circuit breaker pattern cho khả năng phục hồi",
+      "serviceDiscovery": "Service discovery và load balancing"
+    },
+    "domains": {
+      "account": {
+        "title": "Account Domain",
+        "subtitle": "Quản lý Người dùng",
+        "features": {
+          "registration": "Đăng ký người dùng & hồ sơ",
+          "authentication": "Xác thực & đăng nhập",
+          "verification": "Xác minh tài khoản",
+          "passwordMgmt": "Quản lý mật khẩu"
+        }
+      },
+      "authorization": {
+        "title": "Authorization Domain",
+        "subtitle": "Kiểm soát Truy cập",
+        "features": {
+          "rbac": "Kiểm soát truy cập dựa trên vai trò",
+          "jwtManagement": "Quản lý JWT token",
+          "permissionValidation": "Xác thực quyền hạn",
+          "apiGatewaySecurity": "Bảo mật API gateway"
+        }
+      },
+      "content": {
+        "title": "Content Domain",
+        "subtitle": "Quản lý Media",
+        "features": {
+          "fileUploads": "Upload file & xử lý",
+          "cdnIntegration": "Tích hợp CDN",
+          "imageOptimization": "Tối ưu hóa hình ảnh",
+          "storageManagement": "Quản lý lưu trữ"
+        }
+      },
+      "communication": {
+        "title": "Communication Domain",
+        "subtitle": "Messaging",
+        "features": {
+          "emailDelivery": "Gửi email & template",
+          "notifications": "Push notifications",
+          "messageQueues": "Xử lý message queue",
+          "eventBroadcasting": "Phát sóng sự kiện"
+        }
+      }
+    },
+    "dataFlowPatterns": "Luồng Dữ liệu & Mô hình Tích hợp",
+    "databasePerService": {
+      "title": "Database riêng cho mỗi Service",
+      "description": "Mỗi microservice duy trì database riêng để đảm bảo tự chủ dữ liệu và tránh liên kết chặt chẽ giữa các service.",
+      "badges": {
+        "dataIsolation": "Cách ly dữ liệu"
+      }
+    },
+    "apiGateway": {
+      "title": "Mô hình API Gateway",
+      "description": "Điểm vào tập trung cho tất cả client requests với routing, authentication, rate limiting, và monitoring.",
+      "badges": {
+        "loadBalancing": "Cân bằng tải",
+        "rateLimiting": "Giới hạn tốc độ",
+        "sslTermination": "SSL Termination"
+      }
+    },
+    "eventDriven": {
+      "title": "Giao tiếp hướng sự kiện",
+      "description": "Messaging bất đồng bộ sử dụng RabbitMQ cho loose coupling và cải thiện khả năng phục h��i hệ thống.",
+      "badges": {
+        "eventSourcing": "Event Sourcing",
+        "messageQueues": "Message Queues"
+      }
+    },
+    "securityMonitoring": {
+      "title": "Bảo mật & Giám sát",
+      "description": "Bảo mật toàn diện với JWT tokens, kiểm soát truy cập dựa trên vai trò, và giám sát thời gian thực.",
+      "badges": {
+        "jwtAuth": "JWT Auth",
+        "rbac": "RBAC",
+        "observability": "Khả năng quan sát"
+      }
+    }
+  },
+  "technology": {
+    "title": "Công nghệ",
+    "description": "Các công nghệ được sử dụng trong hệ thống"
+  }
+}
