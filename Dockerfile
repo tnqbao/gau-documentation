@@ -49,8 +49,10 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Create data directory for SQLite database with proper permissions
+RUN mkdir -p /app/data /app/public/uploads && \
+    chown -R nextjs:nodejs /app/data /app/public/uploads && \
+    chmod -R 755 /app/data /app/public/uploads
 
 USER nextjs
 
