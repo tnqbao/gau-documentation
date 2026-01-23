@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import AdminFloatingBar from '@/components/AdminFloatingBar';
+import { ArrowLeft } from 'lucide-react';
 
-const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {
+const NotionEditor = dynamic(() => import('@/components/NotionEditor'), {
   ssr: false,
-  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded" />
+  loading: () => <div className="animate-pulse h-64 bg-gray-100 rounded-xl"></div>,
 });
 
 export default function NewDocumentPage() {
@@ -16,7 +18,7 @@ export default function NewDocumentPage() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState('<p>Start writing your document...</p>');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,16 +37,23 @@ export default function NewDocumentPage() {
       .replace(/(^-|-$)/g, '');
   };
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
+  const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
     if (!slug || slug === generateSlug(title)) {
       setSlug(generateSlug(newTitle));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
+    if (!title.trim()) {
+      setError('Please enter a title');
+      return;
+    }
+    if (!slug.trim()) {
+      setError('Please enter a URL slug');
+      return;
+    }
+
     setError('');
     setSaving(true);
 
@@ -60,7 +69,8 @@ export default function NewDocumentPage() {
         throw new Error(data.error || 'Failed to create document');
       }
 
-      router.push('/admin');
+      const doc = await res.json();
+      router.push(`/docs/${doc.slug}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -68,79 +78,63 @@ export default function NewDocumentPage() {
     }
   };
 
+  const handleCancel = () => router.push('/admin');
+
   if (status === 'loading') {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-4">
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900">
-                ← Back
-              </Link>
-              <h1 className="text-xl font-bold text-gray-900">New Document</h1>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white">
+      <AdminFloatingBar
+        isEditing={true}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        saving={saving}
+        documentTitle={title || 'New Document'}
+      />
+
+      <header className="border-b border-gray-100 bg-white sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <Link href="/admin" className="text-gray-500 hover:text-gray-900 transition-colors text-sm flex items-center gap-2">
+            <ArrowLeft size={16} />
+            Back to Documents
+          </Link>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={handleTitleChange}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Slug</label>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+            {error}
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-            <div className="bg-white border border-gray-300 rounded-md">
-              <MarkdownEditor value={content} onChange={setContent} />
-            </div>
-          </div>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder="Untitled"
+          className="text-4xl md:text-5xl font-bold text-gray-900 w-full border-0 focus:outline-none placeholder-gray-300 mb-4"
+          autoFocus
+        />
 
-          <div className="flex justify-end gap-4">
-            <Link
-              href="/admin"
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? 'Creating...' : 'Create Document'}
-            </button>
-          </div>
-        </form>
+        <div className="mb-8 flex items-center gap-2 text-sm">
+          <span className="text-gray-400">/docs/</span>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="url-slug"
+            className="text-gray-600 border-0 border-b border-dashed border-gray-300 focus:outline-none focus:border-blue-500 py-1 px-1 bg-transparent"
+          />
+        </div>
+
+        <NotionEditor content={content} onChange={setContent} editable={true} />
       </main>
     </div>
   );

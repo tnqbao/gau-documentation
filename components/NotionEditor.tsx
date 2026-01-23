@@ -1,20 +1,43 @@
 'use client';
 
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { common, createLowlight } from 'lowlight';
-import { useCallback, useEffect } from 'react';
+import { TextStyle, FontFamily, FontSize, Color } from '@tiptap/extension-text-style';
+import { createLowlight } from 'lowlight';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import ResizableImage from './ResizableImage';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import CodeBlockComponent from './CodeBlockComponent';
+
+// Import các ngôn ngữ từ highlight.js
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import python from 'highlight.js/lib/languages/python';
+import java from 'highlight.js/lib/languages/java';
+import cpp from 'highlight.js/lib/languages/cpp';
+import csharp from 'highlight.js/lib/languages/csharp';
+import php from 'highlight.js/lib/languages/php';
+import ruby from 'highlight.js/lib/languages/ruby';
+import go from 'highlight.js/lib/languages/go';
+import rust from 'highlight.js/lib/languages/rust';
+import swift from 'highlight.js/lib/languages/swift';
+import kotlin from 'highlight.js/lib/languages/kotlin';
+import dart from 'highlight.js/lib/languages/dart';
+import bash from 'highlight.js/lib/languages/bash';
+import shell from 'highlight.js/lib/languages/shell';
+import sql from 'highlight.js/lib/languages/sql';
+import json from 'highlight.js/lib/languages/json';
+import xml from 'highlight.js/lib/languages/xml';
+import css from 'highlight.js/lib/languages/css';
+import scss from 'highlight.js/lib/languages/scss';
+
 import {
   Bold,
   Italic,
@@ -37,9 +60,67 @@ import {
   Highlighter,
   Undo,
   Redo,
+  Type,
+  ChevronDown,
+  ALargeSmall,
+  GripVertical,
+  Palette,
+  X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 
-const lowlight = createLowlight(common);
+const lowlight = createLowlight();
+
+// Đăng ký các ngôn ngữ
+lowlight.register('javascript', javascript);
+lowlight.register('typescript', typescript);
+lowlight.register('python', python);
+lowlight.register('java', java);
+lowlight.register('cpp', cpp);
+lowlight.register('csharp', csharp);
+lowlight.register('php', php);
+lowlight.register('ruby', ruby);
+lowlight.register('go', go);
+lowlight.register('rust', rust);
+lowlight.register('swift', swift);
+lowlight.register('kotlin', kotlin);
+lowlight.register('dart', dart);
+lowlight.register('bash', bash);
+lowlight.register('shell', shell);
+lowlight.register('sql', sql);
+lowlight.register('json', json);
+lowlight.register('xml', xml);
+lowlight.register('css', css);
+lowlight.register('scss', scss);
+
+// Danh sách font chữ
+const FONT_FAMILIES = [
+  { name: 'Default', value: '' },
+  { name: 'Arial', value: 'Arial' },
+  { name: 'Georgia', value: 'Georgia' },
+  { name: 'Times New Roman', value: 'Times New Roman' },
+  { name: 'Courier New', value: 'Courier New' },
+  { name: 'Verdana', value: 'Verdana' },
+  { name: 'Trebuchet MS', value: 'Trebuchet MS' },
+  { name: 'Comic Sans MS', value: 'Comic Sans MS' },
+  { name: 'Impact', value: 'Impact' },
+  { name: 'Roboto', value: 'Roboto' },
+  { name: 'Open Sans', value: 'Open Sans' },
+  { name: 'Montserrat', value: 'Montserrat' },
+];
+
+// Màu sắc phổ biến
+const COLORS = [
+  '#000000', '#434343', '#666666', '#999999', '#B7B7B7', '#CCCCCC', '#D9D9D9', '#EFEFEF', '#F3F3F3', '#FFFFFF',
+  '#980000', '#FF0000', '#FF9900', '#FFFF00', '#00FF00', '#00FFFF', '#4A86E8', '#0000FF', '#9900FF', '#FF00FF',
+  '#E6B8AF', '#F4CCCC', '#FCE5CD', '#FFF2CC', '#D9EAD3', '#D0E0E3', '#C9DAF8', '#CFE2F3', '#D9D2E9', '#EAD1DC',
+  '#DD7E6B', '#EA9999', '#F9CB9C', '#FFE599', '#B6D7A8', '#A2C4C9', '#A4C2F4', '#9FC5E8', '#B4A7D6', '#D5A6BD',
+  '#CC4125', '#E06666', '#F6B26B', '#FFD966', '#93C47D', '#76A5AF', '#6D9EEB', '#6FA8DC', '#8E7CC3', '#C27BA0',
+  '#A61C00', '#CC0000', '#E69138', '#F1C232', '#6AA84F', '#45818E', '#3C78D8', '#3D85C6', '#674EA7', '#A64D79',
+  '#85200C', '#990000', '#B45F06', '#BF9000', '#38761D', '#134F5C', '#1155CC', '#0B5394', '#351C75', '#741B47',
+  '#5B0F00', '#660000', '#783F04', '#7F6000', '#274E13', '#0C343D', '#1C4587', '#073763', '#20124D', '#4C1130',
+];
 
 interface NotionEditorProps {
   content: string;
@@ -48,7 +129,48 @@ interface NotionEditorProps {
 }
 
 export default function NotionEditor({ content, onChange, editable = true }: NotionEditorProps) {
+  const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [fontSize, setFontSizeValue] = useState('16');
+  const [isDragging, setIsDragging] = useState(false);
+  const [toolbarPosition, setToolbarPosition] = useState({ x: 20, y: 20 });
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [toolbarScale, setToolbarScale] = useState(1);
+  const [isUploading, setIsUploading] = useState(false);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  // Upload image to Object Storage
+  const uploadImage = useCallback(async (file: File): Promise<string | null> => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', 'documents');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      return result.url;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  }, []);
+
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         codeBlock: false,
@@ -59,15 +181,15 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
           class: 'text-blue-600 underline cursor-pointer',
         },
       }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg my-4',
-        },
-      }),
+      ResizableImage,
       Placeholder.configure({
         placeholder: 'Start writing, or press "/" for commands...',
       }),
       Underline,
+      TextStyle,
+      FontFamily,
+      FontSize,
+      Color,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -91,11 +213,13 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
           class: 'border border-gray-300 p-2',
         },
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
-        HTMLAttributes: {
-          class: 'bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto text-sm font-mono',
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent);
         },
+      }).configure({
+        lowlight,
+        defaultLanguage: 'plaintext',
       }),
     ],
     content,
@@ -105,10 +229,47 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[200px] px-4 py-2',
+        class: 'prose prose-sm sm:prose-base lg:prose-lg max-w-none focus:outline-none min-h-[200px] p-6 sm:p-8',
       },
       handlePaste: (view, event) => {
-        // Cho phép paste HTML giữ định dạng
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.startsWith('image/')) {
+            event.preventDefault();
+            const file = item.getAsFile();
+            if (file) {
+              uploadImage(file).then((url) => {
+                if (url && editor) {
+                  editor.chain().focus().setImage({ src: url }).run();
+                }
+              });
+            }
+            return true;
+          }
+        }
+        return false;
+      },
+      handleDrop: (view, event, slice, moved) => {
+        if (moved) return false;
+
+        const files = event.dataTransfer?.files;
+        if (!files || files.length === 0) return false;
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.type.startsWith('image/')) {
+            event.preventDefault();
+            uploadImage(file).then((url) => {
+              if (url && editor) {
+                editor.chain().focus().setImage({ src: url }).run();
+              }
+            });
+            return true;
+          }
+        }
         return false;
       },
     },
@@ -119,6 +280,70 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  // Handle inline code copy on click
+  useEffect(() => {
+    const handleCodeClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'CODE' && !target.closest('pre')) {
+        const codeText = target.textContent || '';
+        navigator.clipboard.writeText(codeText).then(() => {
+          target.classList.add('code-copied');
+          setTimeout(() => {
+            target.classList.remove('code-copied');
+          }, 1000);
+        });
+      }
+    };
+
+    document.addEventListener('click', handleCodeClick);
+    return () => document.removeEventListener('click', handleCodeClick);
+  }, []);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowFontMenu(false);
+      setShowColorPicker(false);
+    };
+    if (showFontMenu || showColorPicker) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showFontMenu, showColorPicker]);
+
+  // Handle dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX - toolbarPosition.x,
+      y: e.clientY - toolbarPosition.y,
+    };
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setToolbarPosition({
+          x: e.clientX - dragStart.current.x,
+          y: e.clientY - dragStart.current.y,
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging]);
 
   const addImage = useCallback(() => {
     const url = window.prompt('Enter image URL:');
@@ -139,6 +364,40 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
       editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
     }
   }, [editor]);
+
+  const setFontFamily = useCallback((fontFamily: string) => {
+    if (editor) {
+      if (fontFamily === '') {
+        editor.chain().focus().unsetFontFamily().run();
+      } else {
+        editor.chain().focus().setFontFamily(fontFamily).run();
+      }
+    }
+    setShowFontMenu(false);
+  }, [editor]);
+
+  const handleFontSizeChange = useCallback((size: string) => {
+    if (editor) {
+      const numSize = parseInt(size);
+      if (numSize > 0 && numSize <= 200) {
+        editor.chain().focus().setFontSize(`${numSize}px`).run();
+      }
+    }
+  }, [editor]);
+
+  const setTextColor = useCallback((color: string) => {
+    if (editor) {
+      editor.chain().focus().setColor(color).run();
+    }
+    setShowColorPicker(false);
+  }, [editor]);
+
+  const getCurrentFont = () => {
+    if (!editor) return 'Default';
+    const fontFamily = editor.getAttributes('textStyle').fontFamily;
+    const found = FONT_FAMILIES.find(f => f.value === fontFamily);
+    return found?.name || 'Default';
+  };
 
   if (!editor) {
     return <div className="animate-pulse bg-gray-100 h-64 rounded-lg" />;
@@ -168,214 +427,343 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
   );
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
-      {/* Toolbar */}
+    <div className="relative">
+      {/* Floating Toolbar */}
       {editable && (
-        <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50">
-          {/* Undo/Redo */}
-          <ToolButton onClick={() => editor.chain().focus().undo().run()} title="Undo">
-            <Undo size={18} />
-          </ToolButton>
-          <ToolButton onClick={() => editor.chain().focus().redo().run()} title="Redo">
-            <Redo size={18} />
-          </ToolButton>
+        <div
+          ref={toolbarRef}
+          className="fixed z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl"
+          style={{
+            left: `${toolbarPosition.x}px`,
+            top: `${toolbarPosition.y}px`,
+            cursor: isDragging ? 'grabbing' : 'default',
+            transform: `scale(${toolbarScale})`,
+            transformOrigin: 'top left',
+          }}
+        >
+          {/* Drag Handle */}
+          <div
+            className="flex items-center justify-between p-2 bg-gray-100 rounded-t-xl border-b border-gray-300 cursor-grab active:cursor-grabbing"
+            onMouseDown={handleMouseDown}
+          >
+            <div className="flex items-center gap-2">
+              <GripVertical size={16} className="text-gray-500" />
+              <span className="text-xs font-semibold text-gray-700">Formatting Tools</span>
+            </div>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1 hover:bg-gray-200 rounded"
+              title={isCollapsed ? "Expand" : "Collapse"}
+            >
+              {isCollapsed ? <ChevronDown size={14} /> : <X size={14} />}
+            </button>
+          </div>
 
-          <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
+          {/* Toolbar Content */}
+          {!isCollapsed && (
+            <div className="p-2 flex flex-col gap-2 max-w-xs">
+              {/* Row 1: Undo/Redo, Font, Size, Color */}
+              <div className="flex flex-wrap gap-1 items-center">
+                <ToolButton onClick={() => editor.chain().focus().undo().run()} title="Undo">
+                  <Undo size={16} />
+                </ToolButton>
+                <ToolButton onClick={() => editor.chain().focus().redo().run()} title="Redo">
+                  <Redo size={16} />
+                </ToolButton>
 
-          {/* Text formatting */}
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            isActive={editor.isActive('bold')}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            isActive={editor.isActive('italic')}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            isActive={editor.isActive('underline')}
-            title="Underline (Ctrl+U)"
-          >
-            <UnderlineIcon size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            isActive={editor.isActive('strike')}
-            title="Strikethrough"
-          >
-            <Strikethrough size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            isActive={editor.isActive('highlight')}
-            title="Highlight"
-          >
-            <Highlighter size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            isActive={editor.isActive('code')}
-            title="Inline Code"
-          >
-            <Code size={18} />
-          </ToolButton>
+                <div className="w-px h-6 bg-gray-300 mx-1" />
 
-          <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
+                {/* Font Family */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowFontMenu(!showFontMenu);
+                      setShowColorPicker(false);
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-100 text-xs min-w-[80px]"
+                    title="Font"
+                  >
+                    <Type size={14} />
+                    <span className="truncate text-xs">{getCurrentFont()}</span>
+                    <ChevronDown size={12} />
+                  </button>
+                  {showFontMenu && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] max-h-[200px] overflow-y-auto">
+                      {FONT_FAMILIES.map((font) => (
+                        <button
+                          key={font.name}
+                          type="button"
+                          onClick={() => setFontFamily(font.value)}
+                          className={`w-full text-left px-2 py-1.5 text-xs hover:bg-gray-100 ${
+                            getCurrentFont() === font.name ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                          }`}
+                          style={{ fontFamily: font.value || 'inherit' }}
+                        >
+                          {font.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-          {/* Headings */}
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            isActive={editor.isActive('heading', { level: 1 })}
-            title="Heading 1"
-          >
-            <Heading1 size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            isActive={editor.isActive('heading', { level: 2 })}
-            title="Heading 2"
-          >
-            <Heading2 size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            isActive={editor.isActive('heading', { level: 3 })}
-            title="Heading 3"
-          >
-            <Heading3 size={18} />
-          </ToolButton>
+                {/* Font Size Input */}
+                <div className="flex items-center gap-1">
+                  <ALargeSmall size={14} className="text-gray-500" />
+                  <input
+                    type="number"
+                    min="8"
+                    max="200"
+                    value={fontSize}
+                    onChange={(e) => {
+                      setFontSizeValue(e.target.value);
+                      handleFontSizeChange(e.target.value);
+                    }}
+                    className="w-14 px-1.5 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    title="Font Size"
+                  />
+                </div>
 
-          <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
+                {/* Color Picker */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowColorPicker(!showColorPicker);
+                      setShowFontMenu(false);
+                    }}
+                    className="p-1.5 rounded hover:bg-gray-100"
+                    title="Text Color"
+                  >
+                    <Palette size={16} />
+                  </button>
+                  {showColorPicker && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2 w-48">
+                      <div className="grid grid-cols-10 gap-1">
+                        {COLORS.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setTextColor(color)}
+                            className="w-5 h-5 rounded border border-gray-300 hover:scale-110 transition-transform"
+                            style={{ backgroundColor: color }}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          {/* Lists */}
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            isActive={editor.isActive('bulletList')}
-            title="Bullet List"
-          >
-            <List size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            isActive={editor.isActive('orderedList')}
-            title="Numbered List"
-          >
-            <ListOrdered size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            isActive={editor.isActive('blockquote')}
-            title="Quote"
-          >
-            <Quote size={18} />
-          </ToolButton>
+              {/* Row 2: Text Formatting */}
+              <div className="flex flex-wrap gap-1">
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleBold().run()}
+                  isActive={editor.isActive('bold')}
+                  title="Bold"
+                >
+                  <Bold size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleItalic().run()}
+                  isActive={editor.isActive('italic')}
+                  title="Italic"
+                >
+                  <Italic size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleUnderline().run()}
+                  isActive={editor.isActive('underline')}
+                  title="Underline"
+                >
+                  <UnderlineIcon size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleStrike().run()}
+                  isActive={editor.isActive('strike')}
+                  title="Strike"
+                >
+                  <Strikethrough size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHighlight().run()}
+                  isActive={editor.isActive('highlight')}
+                  title="Highlight"
+                >
+                  <Highlighter size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleCode().run()}
+                  isActive={editor.isActive('code')}
+                  title="Code"
+                >
+                  <Code size={16} />
+                </ToolButton>
+              </div>
 
-          <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
+              {/* Row 3: Headings */}
+              <div className="flex flex-wrap gap-1">
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                  isActive={editor.isActive('heading', { level: 1 })}
+                  title="H1"
+                >
+                  <Heading1 size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                  isActive={editor.isActive('heading', { level: 2 })}
+                  title="H2"
+                >
+                  <Heading2 size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                  isActive={editor.isActive('heading', { level: 3 })}
+                  title="H3"
+                >
+                  <Heading3 size={16} />
+                </ToolButton>
+              </div>
 
-          {/* Alignment */}
-          <ToolButton
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            isActive={editor.isActive({ textAlign: 'left' })}
-            title="Align Left"
-          >
-            <AlignLeft size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            isActive={editor.isActive({ textAlign: 'center' })}
-            title="Align Center"
-          >
-            <AlignCenter size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            isActive={editor.isActive({ textAlign: 'right' })}
-            title="Align Right"
-          >
-            <AlignRight size={18} />
-          </ToolButton>
+              {/* Row 4: Lists & Alignment */}
+              <div className="flex flex-wrap gap-1">
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleBulletList().run()}
+                  isActive={editor.isActive('bulletList')}
+                  title="Bullet List"
+                >
+                  <List size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                  isActive={editor.isActive('orderedList')}
+                  title="Numbered List"
+                >
+                  <ListOrdered size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                  isActive={editor.isActive('blockquote')}
+                  title="Quote"
+                >
+                  <Quote size={16} />
+                </ToolButton>
 
-          <div className="w-px h-6 bg-gray-300 mx-1 self-center" />
+                <div className="w-px h-6 bg-gray-300 mx-1" />
 
-          {/* Insert */}
-          <ToolButton onClick={addLink} isActive={editor.isActive('link')} title="Add Link">
-            <LinkIcon size={18} />
-          </ToolButton>
-          <ToolButton onClick={addImage} title="Add Image">
-            <ImageIcon size={18} />
-          </ToolButton>
-          <ToolButton onClick={addTable} title="Add Table">
-            <TableIcon size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            title="Horizontal Rule"
-          >
-            <Minus size={18} />
-          </ToolButton>
-          <ToolButton
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            isActive={editor.isActive('codeBlock')}
-            title="Code Block"
-          >
-            <Code size={18} />
-          </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                  isActive={editor.isActive({ textAlign: 'left' })}
+                  title="Left"
+                >
+                  <AlignLeft size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                  isActive={editor.isActive({ textAlign: 'center' })}
+                  title="Center"
+                >
+                  <AlignCenter size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                  isActive={editor.isActive({ textAlign: 'right' })}
+                  title="Right"
+                >
+                  <AlignRight size={16} />
+                </ToolButton>
+              </div>
+
+              {/* Row 5: Insert */}
+              <div className="flex flex-wrap gap-1">
+                <ToolButton onClick={addLink} isActive={editor.isActive('link')} title="Link">
+                  <LinkIcon size={16} />
+                </ToolButton>
+                <ToolButton onClick={addImage} title="Image URL">
+                  <ImageIcon size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload Image"
+                >
+                  {isUploading ? (
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  )}
+                </ToolButton>
+                <ToolButton onClick={addTable} title="Table">
+                  <TableIcon size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().setHorizontalRule().run()}
+                  title="HR"
+                >
+                  <Minus size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                  isActive={editor.isActive('codeBlock')}
+                  title="Code Block"
+                >
+                  <Code size={16} />
+                </ToolButton>
+              </div>
+
+              {/* Row 6: Zoom */}
+              <div className="flex flex-wrap gap-1">
+                <ToolButton
+                  onClick={() => {
+                    setToolbarScale((prev) => Math.min(prev + 0.1, 2));
+                  }}
+                  title="Zoom In"
+                >
+                  <ZoomIn size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => {
+                    setToolbarScale((prev) => Math.max(prev - 0.1, 0.5));
+                  }}
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={16} />
+                </ToolButton>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Bubble Menu for selected text */}
-      {editable && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <div className="bg-gray-900 text-white rounded-lg shadow-xl flex p-1 gap-1">
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('bold') ? 'bg-gray-700' : ''}`}
-            >
-              <Bold size={16} />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('italic') ? 'bg-gray-700' : ''}`}
-            >
-              <Italic size={16} />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('underline') ? 'bg-gray-700' : ''}`}
-            >
-              <UnderlineIcon size={16} />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('strike') ? 'bg-gray-700' : ''}`}
-            >
-              <Strikethrough size={16} />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleHighlight().run()}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('highlight') ? 'bg-gray-700' : ''}`}
-            >
-              <Highlighter size={16} />
-            </button>
-            <button
-              onClick={addLink}
-              className={`p-1.5 rounded hover:bg-gray-700 ${editor.isActive('link') ? 'bg-gray-700' : ''}`}
-            >
-              <LinkIcon size={16} />
-            </button>
-          </div>
-        </BubbleMenu>
-      )}
-
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
+        <EditorContent editor={editor} />
+      </div>
+
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            uploadImage(file).then((url) => {
+              if (url && editor) {
+                editor.chain().focus().setImage({ src: url }).run();
+              }
+            });
+          }
+        }}
+        className="hidden"
+      />
     </div>
   );
 }
-

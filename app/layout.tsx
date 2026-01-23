@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
-import I18nProvider from "@/components/I18nProvider";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Gau Microservices Documentation",
-  description: "Tài liệu hệ thống microservices Gau - Kiến trúc, API và triển khai",
+  title: "Gauas Document",
+  description: "Web Document CMS - Simple, easy to deploy document management system",
 };
 
 export default function RootLayout({
@@ -16,14 +15,9 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="antialiased">
-        <I18nProvider>
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 ml-64 p-8">
-              <div className="max-w-7xl mx-auto">{children}</div>
-            </main>
-          </div>
-        </I18nProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

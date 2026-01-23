@@ -52,7 +52,7 @@ export default function CodeBlockComponent({ node, updateAttributes }: NodeViewP
 
   return (
     <NodeViewWrapper className="code-block relative my-4 group">
-      <div className={`rounded-lg overflow-hidden border-2 ${colors.border}`}>
+      <div className={`rounded-2xl overflow-hidden border-2 ${colors.border}`}>
         {/* Header with language badge and copy button */}
         <div className={`flex items-center justify-between px-4 py-2 ${colors.bg} border-b ${colors.border}`}>
           <div className="flex items-center gap-2">
@@ -126,4 +126,3 @@ export default function CodeBlockComponent({ node, updateAttributes }: NodeViewP
     </NodeViewWrapper>
   );
 }
-

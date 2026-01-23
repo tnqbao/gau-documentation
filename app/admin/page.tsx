@@ -1,16 +1,28 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Document } from '@/lib/db';
+import AdminFloatingBar from '@/components/AdminFloatingBar';
+import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload } from 'lucide-react';
+
+interface Document {
+  id: number;
+  slug: string;
+  title: string;
+  content_md: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -28,7 +40,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/documents');
       const data = await res.json();
-      setDocuments(data);
+      setDocuments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch documents:', error);
     } finally {
@@ -36,122 +48,213 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
+  const handleDelete = async (id: number, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
 
+    setDeleteId(id);
     try {
       await fetch(`/api/documents/${id}`, { method: 'DELETE' });
       fetchDocuments();
     } catch (error) {
       console.error('Failed to delete document:', error);
+    } finally {
+      setDeleteId(null);
     }
+  };
+
+  const handleExportPagesMap = async () => {
+    try {
+      const response = await fetch('/api/export');
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'docs.db';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export database:', error);
+      alert('Failed to export database');
+    }
+  };
+
+  const handleImportSitemap = async () => {
+    const confirmed = confirm(
+      '⚠️ WARNING: This will replace ALL current documents with the imported database.\n\n' +
+      'Are you sure you want to continue? This action CANNOT be undone!'
+    );
+
+    if (!confirmed) return;
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.db,.sqlite,.sqlite3';
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      // Double confirmation
+      const doubleConfirm = confirm(
+        `You selected: ${file.name}\n\n` +
+        'This will PERMANENTLY REPLACE all current documents.\n\n' +
+        'Are you absolutely sure?'
+      );
+
+      if (!doubleConfirm) return;
+
+      setImporting(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/import', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Import failed');
+        }
+
+        alert('✅ Database imported successfully! The page will now reload.');
+        window.location.reload();
+      } catch (error) {
+        console.error('Failed to import database:', error);
+        alert(`❌ Failed to import database: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+        setImporting(false);
+      }
+    };
+
+    input.click();
   };
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-xl font-bold text-gray-900">Document CMS</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-600">Welcome, {session.user?.name}</span>
+      <AdminFloatingBar />
+
+      <header className="bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">Documents</h1>
+              <p className="text-gray-500">{documents.length} document{documents.length !== 1 ? 's' : ''} total</p>
+            </div>
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => signOut({ callbackUrl: '/admin/login' })}
-                className="text-sm text-red-600 hover:text-red-800"
+                onClick={handleImportSitemap}
+                disabled={importing}
+                className="flex items-center gap-2 px-5 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
               >
-                Sign out
+                <Upload size={20} />
+                <span>{importing ? 'Importing...' : 'Import Sitemap'}</span>
               </button>
+              <button
+                onClick={handleExportPagesMap}
+                className="flex items-center gap-2 px-5 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors shadow-sm"
+              >
+                <Download size={20} />
+                <span>Export Pages Map</span>
+              </button>
+              <Link
+                href="/admin/documents/new"
+                className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                <Plus size={20} />
+                <span>New Document</span>
+              </Link>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Documents</h2>
-          <Link
-            href="/admin/documents/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            New Document
-          </Link>
-        </div>
-
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {documents.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-            No documents yet. Create your first document!
+          <div className="bg-white rounded-3xl border border-gray-100 p-16 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-6">
+              <FileText className="text-gray-400" size={40} />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-3">No documents yet</h3>
+            <p className="text-gray-500 mb-8">Create your first document to start building your documentation.</p>
+            <Link
+              href="/admin/documents/new"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+            >
+              <Plus size={20} />
+              Create Your First Document
+            </Link>
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Slug
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Updated
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {documents.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        href={`/docs/${doc.slug}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
-                        target="_blank"
-                      >
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            {documents.map((doc, index) => (
+              <div
+                key={doc.id}
+                className={`flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${
+                  index !== documents.length - 1 ? 'border-b border-gray-100' : ''
+                }`}
+              >
+                <Link href={`/docs/${doc.slug}`} className="flex-1 min-w-0 group">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-blue-100 transition-colors">
+                      <FileText size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                         {doc.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      /{doc.slug}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(doc.updated_at).toLocaleDateString('vi-VN')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                      <Link
-                        href={`/admin/documents/${doc.id}/edit`}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(doc.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </h3>
+                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} />
+                          {new Date(doc.updated_at).toLocaleDateString('vi-VN')}
+                        </span>
+                        <span>•</span>
+                        <span className="truncate">/{doc.slug}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                <div className="flex items-center gap-2 ml-4">
+                  <Link
+                    href={`/docs/${doc.slug}`}
+                    target="_blank"
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <ExternalLink size={18} />
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(doc.id, doc.title)}
+                    disabled={deleteId === doc.id}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
+
+        <div className="mt-8">
+          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+            ← View Public Site
+          </Link>
+        </div>
       </main>
     </div>
   );
 }
-
