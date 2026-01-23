@@ -38,9 +38,10 @@ jobs:
           cd /home/bao/gauas-documentation || mkdir -p /home/bao/gauas-documentation
           cd /home/bao/gauas-documentation
 
-          # Create directories with proper permissions BEFORE pulling image
+          # Create directories with proper ownership for nextjs user (uid 1001 in container)
           mkdir -p data public/uploads
-          chmod 755 data public/uploads
+          sudo chown -R 1001:1001 data public/uploads
+          sudo chmod -R 755 data public/uploads
 
           # Pull latest image
           docker pull iamqbao/gauas-documentation:latest
