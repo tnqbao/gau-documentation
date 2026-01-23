@@ -35,8 +35,8 @@ jobs:
           sshpass -p "$SSHPASS" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
 
           # Navigate to project directory
-          cd /home/debian/gauas-documentation || mkdir -p /home/debian/gauas-documentation
-          cd /home/debian/gauas-documentation
+          cd /home/runner/gauas-documentation || mkdir -p /home/runner/gauas-documentation
+          cd /home/runner/gauas-documentation
 
           # Pull latest image
           docker pull iamqbao/gauas-documentation:latest

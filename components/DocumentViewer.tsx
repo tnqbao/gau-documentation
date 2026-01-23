@@ -22,6 +22,8 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
   const { data: session } = useSession();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(document.title);
+  const [description, setDescription] = useState(document.description || '');
   const [content, setContent] = useState(document.content_md);
   const [displayHtml, setDisplayHtml] = useState(initialHtmlContent);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,7 +39,8 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: document.title,
+          title: title,
+          description: description,
           content_md: content,
           slug: document.slug,
         }),
@@ -58,9 +61,11 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
     } finally {
       setIsSaving(false);
     }
-  }, [content, document, router]);
+  }, [title, description, content, document, router]);
 
   const handleCancel = () => {
+    setTitle(document.title);
+    setDescription(document.description || '');
     setContent(document.content_md);
     setIsEditing(false);
   };
@@ -150,6 +155,35 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
       {/* Main Content */}
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 lg:py-12 max-w-7xl">
+          {/* Document Header with Title and Description */}
+          <div className="mb-6">
+            {isEditing ? (
+              <>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="text-3xl sm:text-4xl font-bold text-gray-900 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1 mb-2"
+                  placeholder="Document title"
+                />
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="text-lg text-gray-600 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1"
+                  placeholder="Add a description..."
+                />
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{title}</h1>
+                {description && (
+                  <p className="text-lg text-gray-600">{description}</p>
+                )}
+              </>
+            )}
+          </div>
+
           {/* Document Metadata */}
           <div className="mb-6 flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-1.5">

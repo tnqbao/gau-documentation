@@ -47,6 +47,8 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
+  Heading5,
   List,
   ListOrdered,
   Quote,
@@ -216,6 +218,29 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
       CodeBlockLowlight.extend({
         addNodeView() {
           return ReactNodeViewRenderer(CodeBlockComponent);
+        },
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            bgColor: {
+              default: '#1a1a1a',
+              parseHTML: element => element.getAttribute('data-bg-color'),
+              renderHTML: attributes => {
+                return {
+                  'data-bg-color': attributes.bgColor,
+                };
+              },
+            },
+            textColor: {
+              default: '#e5e5e5',
+              parseHTML: element => element.getAttribute('data-text-color'),
+              renderHTML: attributes => {
+                return {
+                  'data-text-color': attributes.textColor,
+                };
+              },
+            },
+          };
         },
       }).configure({
         lowlight,
@@ -626,6 +651,20 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                   title="H3"
                 >
                   <Heading3 size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+                  isActive={editor.isActive('heading', { level: 4 })}
+                  title="H4"
+                >
+                  <Heading4 size={16} />
+                </ToolButton>
+                <ToolButton
+                  onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+                  isActive={editor.isActive('heading', { level: 5 })}
+                  title="H5"
+                >
+                  <Heading5 size={16} />
                 </ToolButton>
               </div>
 

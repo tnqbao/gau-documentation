@@ -5,15 +5,25 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdminFloatingBar from '@/components/AdminFloatingBar';
-import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload } from 'lucide-react';
+import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload, Folder, ChevronDown, ChevronRight } from 'lucide-react';
+
+interface Group {
+  id: number;
+  slug: string;
+  title: string;
+  thumbnail?: string | null;
+}
 
 interface Document {
   id: number;
   slug: string;
   title: string;
+  description?: string | null;
   content_md: string;
   created_at: string;
   updated_at: string;
+  group_id?: number | null;
+  group?: Group | null;
 }
 
 export default function AdminDashboard() {
@@ -23,6 +33,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [importing, setImporting] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -135,6 +146,34 @@ export default function AdminDashboard() {
     input.click();
   };
 
+  const toggleGroup = (groupKey: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  };
+
+  // Gom nhóm documents theo group
+  const groupedDocuments = documents.reduce((acc, doc) => {
+    const groupKey = doc.group ? `group-${doc.group.id}` : 'ungrouped';
+    const groupTitle = doc.group ? doc.group.title : 'Ungrouped Documents';
+
+    if (!acc[groupKey]) {
+      acc[groupKey] = {
+        title: groupTitle,
+        group: doc.group,
+        documents: []
+      };
+    }
+    acc[groupKey].documents.push(doc);
+    return acc;
+  }, {} as Record<string, { title: string; group: Group | null; documents: Document[] }>);
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -171,6 +210,13 @@ export default function AdminDashboard() {
                 <span>Export Pages Map</span>
               </button>
               <Link
+                href="/admin/groups"
+                className="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+              >
+                <Folder size={20} />
+                <span>Manage Groups</span>
+              </Link>
+              <Link
                 href="/admin/documents/new"
                 className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
               >
@@ -199,53 +245,102 @@ export default function AdminDashboard() {
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            {documents.map((doc, index) => (
-              <div
-                key={doc.id}
-                className={`flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${
-                  index !== documents.length - 1 ? 'border-b border-gray-100' : ''
-                }`}
-              >
-                <Link href={`/docs/${doc.slug}`} className="flex-1 min-w-0 group">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-blue-100 transition-colors">
-                      <FileText size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                        {doc.title}
-                      </h3>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {new Date(doc.updated_at).toLocaleDateString('vi-VN')}
-                        </span>
-                        <span>•</span>
-                        <span className="truncate">/{doc.slug}</span>
+          <div className="space-y-4">
+            {Object.entries(groupedDocuments).map(([groupKey, { title, group, documents: groupDocs }]) => {
+              const isCollapsed = collapsedGroups.has(groupKey);
+
+              return (
+                <div key={groupKey} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                  {/* Group Header */}
+                  <button
+                    onClick={() => toggleGroup(groupKey)}
+                    className="w-full flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-colors border-b border-gray-100"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <Folder size={20} className="text-blue-600" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-semibold text-gray-900">{title}</h3>
+                        <p className="text-sm text-gray-500">{groupDocs.length} document{groupDocs.length !== 1 ? 's' : ''}</p>
                       </div>
                     </div>
-                  </div>
-                </Link>
-
-                <div className="flex items-center gap-2 ml-4">
-                  <Link
-                    href={`/docs/${doc.slug}`}
-                    target="_blank"
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-                  >
-                    <ExternalLink size={18} />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(doc.id, doc.title)}
-                    disabled={deleteId === doc.id}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
-                  >
-                    <Trash2 size={18} />
+                    <div className="flex items-center gap-2">
+                      {group && (
+                        <Link
+                          href={`/admin/groups/${group.id}/edit`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        >
+                          Edit Group
+                        </Link>
+                      )}
+                      {isCollapsed ? (
+                        <ChevronRight size={20} className="text-gray-400" />
+                      ) : (
+                        <ChevronDown size={20} className="text-gray-400" />
+                      )}
+                    </div>
                   </button>
+
+                  {/* Documents List */}
+                  {!isCollapsed && (
+                    <div>
+                      {groupDocs.map((doc, index) => (
+                        <div
+                          key={doc.id}
+                          className={`flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${
+                            index !== groupDocs.length - 1 ? 'border-b border-gray-100' : ''
+                          }`}
+                        >
+                          <Link href={`/docs/${doc.slug}`} className="flex-1 min-w-0 group">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2.5 bg-gray-100 rounded-xl group-hover:bg-blue-100 transition-colors">
+                                <FileText size={20} className="text-gray-500 group-hover:text-blue-600 transition-colors" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                                  {doc.title}
+                                </h3>
+                                <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
+                                  <span className="flex items-center gap-1">
+                                    <Clock size={12} />
+                                    {new Date(doc.updated_at).toLocaleDateString('vi-VN')}
+                                  </span>
+                                  {doc.description && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="truncate">{doc.description}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+
+                          <div className="flex items-center gap-2 ml-4">
+                            <Link
+                              href={`/docs/${doc.slug}`}
+                              target="_blank"
+                              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                            >
+                              <ExternalLink size={18} />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(doc.id, doc.title)}
+                              disabled={deleteId === doc.id}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

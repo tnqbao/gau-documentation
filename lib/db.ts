@@ -13,15 +13,54 @@ const db = new Database(dbPath);
 
 // Khởi tạo schema
 db.exec(`
+  CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL,
+    thumbnail TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS documents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT UNIQUE NOT NULL,
     title TEXT NOT NULL,
     content_md TEXT NOT NULL,
+    group_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+// If the table existed from before (without group_id), ensure the column exists
+try {
+  const docCols = db.prepare("PRAGMA table_info(documents)").all() as Array<{ name: string }>;
+  const hasGroupId = docCols.some(c => c.name === 'group_id');
+  if (!hasGroupId) {
+    db.exec("ALTER TABLE documents ADD COLUMN group_id INTEGER");
+  }
+  const hasDescription = docCols.some(c => c.name === 'description');
+  if (!hasDescription) {
+    db.exec("ALTER TABLE documents ADD COLUMN description TEXT");
+  }
+} catch (e) {
+  console.warn('Could not ensure group_id column exists:', e);
+}
+
+// If the groups table existed from before (without thumbnail), ensure the column exists
+try {
+  const cols = db.prepare("PRAGMA table_info(groups)").all() as Array<{ name: string }>;
+  const hasThumb = cols.some(c => c.name === 'thumbnail');
+  if (!hasThumb) {
+    // If groups table exists but has no thumbnail column, try to add it
+    db.exec("ALTER TABLE groups ADD COLUMN thumbnail TEXT");
+  }
+} catch (e) {
+  // ignore
+}
 
 // Tạo admin table
 db.exec(`
@@ -32,11 +71,22 @@ db.exec(`
   )
 `);
 
+export interface Group {
+  id: number;
+  slug: string;
+  title: string;
+  thumbnail?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Document {
   id: number;
   slug: string;
   title: string;
+  description?: string | null;
   content_md: string;
+  group_id?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +94,10 @@ export interface Document {
 // Document operations
 export function getAllDocuments(): Document[] {
   return db.prepare('SELECT * FROM documents ORDER BY updated_at DESC').all() as Document[];
+}
+
+export function getDocumentsByGroupId(groupId: number): Document[] {
+  return db.prepare('SELECT * FROM documents WHERE group_id = ? ORDER BY updated_at DESC').all(groupId) as Document[];
 }
 
 export function getDocumentBySlug(slug: string): Document | undefined {
@@ -54,22 +108,22 @@ export function getDocumentById(id: number): Document | undefined {
   return db.prepare('SELECT * FROM documents WHERE id = ?').get(id) as Document | undefined;
 }
 
-export function createDocument(slug: string, title: string, content_md: string): Document {
+export function createDocument(slug: string, title: string, content_md: string, group_id?: number | null, description?: string | null): Document {
   const stmt = db.prepare(`
-    INSERT INTO documents (slug, title, content_md, created_at, updated_at)
-    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO documents (slug, title, description, content_md, group_id, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `);
-  const result = stmt.run(slug, title, content_md);
+  const result = stmt.run(slug, title, description || null, content_md, group_id || null);
   return getDocumentById(result.lastInsertRowid as number)!;
 }
 
-export function updateDocument(id: number, slug: string, title: string, content_md: string): Document | undefined {
+export function updateDocument(id: number, slug: string, title: string, content_md: string, group_id?: number | null, description?: string | null): Document | undefined {
   const stmt = db.prepare(`
     UPDATE documents 
-    SET slug = ?, title = ?, content_md = ?, updated_at = CURRENT_TIMESTAMP
+    SET slug = ?, title = ?, description = ?, content_md = ?, group_id = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
-  stmt.run(slug, title, content_md, id);
+  stmt.run(slug, title, description || null, content_md, group_id || null, id);
   return getDocumentById(id);
 }
 
@@ -104,6 +158,44 @@ export function getDocumentsByPath(): Record<string, Document[]> {
   });
 
   return grouped;
+}
+
+// Group operations
+export function getAllGroups(): Group[] {
+  return db.prepare('SELECT * FROM groups ORDER BY updated_at DESC').all() as Group[];
+}
+
+export function getGroupBySlug(slug: string): Group | undefined {
+  return db.prepare('SELECT * FROM groups WHERE slug = ?').get(slug) as Group | undefined;
+}
+
+export function getGroupById(id: number): Group | undefined {
+  return db.prepare('SELECT * FROM groups WHERE id = ?').get(id) as Group | undefined;
+}
+
+export function createGroup(slug: string, title: string, thumbnail?: string | null): Group {
+  const stmt = db.prepare(`
+    INSERT INTO groups (slug, title, thumbnail, created_at, updated_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `);
+  const result = stmt.run(slug, title, thumbnail || null);
+  return getGroupById(result.lastInsertRowid as number)!;
+}
+
+export function updateGroup(id: number, slug: string, title: string, thumbnail?: string | null): Group | undefined {
+  const stmt = db.prepare(`
+    UPDATE groups
+    SET slug = ?, title = ?, thumbnail = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `);
+  stmt.run(slug, title, thumbnail || null, id);
+  return getGroupById(id);
+}
+
+export function deleteGroup(id: number): boolean {
+  const stmt = db.prepare('DELETE FROM groups WHERE id = ?');
+  const result = stmt.run(id);
+  return result.changes > 0;
 }
 
 // Admin operations

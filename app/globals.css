@@ -60,6 +60,23 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+/* Code blocks - full width */
+.ProseMirror pre {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 /* Default inline code style */

@@ -1,22 +1,15 @@
 import Link from 'next/link';
 import { FileText, Settings, PenLine, Shield, Zap, ChevronRight, Folder } from 'lucide-react';
-import { getAllDocuments } from '@/lib/db';
+import { getAllGroups, getDocumentsByGroupId, getAllDocuments } from '@/lib/db';
 import Image from 'next/image';
 
 export default function HomePage() {
-  const documents = getAllDocuments();
+  const groups = getAllGroups();
+  const allDocuments = getAllDocuments();
 
-  // Group documents by path
-  const groupedDocs: Record<string, typeof documents> = {};
-  documents.forEach(doc => {
-    const pathParts = doc.slug.split('/');
-    const basePath = pathParts.length > 1 ? pathParts[0] : 'root';
-
-    if (!groupedDocs[basePath]) {
-      groupedDocs[basePath] = [];
-    }
-    groupedDocs[basePath].push(doc);
-  });
+  // Debug: log để kiểm tra
+  console.log('Groups:', groups.map(g => ({ id: g.id, title: g.title })));
+  console.log('All documents:', allDocuments.map(d => ({ title: d.title, group_id: d.group_id })));
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,52 +75,47 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Documents Section */}
-      {documents.length > 0 && (
+      {/* Groups Section */}
+      {groups.length > 0 && (
         <section className="py-16 sm:py-24 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Browse Documentation
+                Browse Documentation Groups
               </h2>
               <p className="text-lg text-gray-600">
-                Explore our comprehensive documentation library
+                Explore documentation categories
               </p>
             </div>
 
-            <div className="space-y-8">
-              {Object.entries(groupedDocs).map(([path, docs]) => (
-                <div key={path} className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Folder className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {path === 'root' ? 'General' : path.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </h3>
-                    <span className="text-sm text-gray-500">({docs.length})</span>
-                  </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {groups.map(group => {
+                const docs = getDocumentsByGroupId(group.id);
+                return (
+                  <Link
+                    key={group.id}
+                    href={`/docs/${group.slug}`}
+                    className="flex flex-col items-start gap-3 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                  >
+                    {group.thumbnail ? (
+                      <div className="w-full h-40 bg-gray-100 rounded-md overflow-hidden mb-2">
+                        <Image src={group.thumbnail} alt={group.title} width={800} height={400} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center text-gray-400">No image</div>
+                    )}
 
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {docs.map(doc => (
-                      <Link
-                        key={doc.id}
-                        href={`/docs/${doc.slug}`}
-                        className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
-                      >
-                        <FileText className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                            {doc.title}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">/{doc.slug}</div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                    <div className="w-full">
+                      <div className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors truncate">{group.title}</div>
+                      <div className="text-sm text-gray-500 mt-1">{docs.length} page{docs.length !== 1 ? 's' : ''}</div>
+                    </div>
+
+                    <div className="mt-auto w-full text-right">
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

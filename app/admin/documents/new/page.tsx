@@ -17,16 +17,28 @@ export default function NewDocumentPage() {
   const { status } = useSession();
   const router = useRouter();
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [slug, setSlug] = useState('');
   const [content, setContent] = useState('<p>Start writing your document...</p>');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [groups, setGroups] = useState<Array<{ id: number; title: string }>>([]);
+  const [groupId, setGroupId] = useState<number | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login');
     }
   }, [status, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetch('/api/groups')
+        .then(r => r.json())
+        .then(data => Array.isArray(data) ? setGroups(data) : setGroups([]))
+        .catch(err => console.error('Failed to load groups', err));
+    }
+  }, [status]);
 
   const generateSlug = (title: string) => {
     return title
@@ -61,7 +73,7 @@ export default function NewDocumentPage() {
       const res = await fetch('/api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, slug, content_md: content })
+        body: JSON.stringify({ title, description, slug, content_md: content, group_id: groupId })
       });
 
       if (!res.ok) {
@@ -114,29 +126,67 @@ export default function NewDocumentPage() {
           </div>
         )}
 
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Untitled"
-          className="text-4xl md:text-5xl font-bold text-gray-900 w-full border-0 focus:outline-none placeholder-gray-300 mb-4"
-          autoFocus
-        />
+        <div className="flex items-start gap-6">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="Untitled"
+              className="text-4xl md:text-5xl font-bold text-gray-900 w-full border-0 focus:outline-none placeholder-gray-300 mb-2"
+              autoFocus
+            />
 
-        <div className="mb-8 flex items-center gap-2 text-sm">
-          <span className="text-gray-400">/docs/</span>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="url-slug"
-            className="text-gray-600 border-0 border-b border-dashed border-gray-300 focus:outline-none focus:border-blue-500 py-1 px-1 bg-transparent"
-          />
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add a short description..."
+              className="text-lg text-gray-500 w-full border-0 focus:outline-none placeholder-gray-300 mb-4"
+            />
+
+            <div className="mb-8 flex items-center gap-2 text-sm">
+              <span className="text-gray-400">/docs/</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                placeholder="url-slug"
+                className="text-gray-600 border-0 border-b border-dashed border-gray-300 focus:outline-none focus:border-blue-500 py-1 px-1 bg-transparent"
+              />
+            </div>
+
+            <NotionEditor content={content} onChange={setContent} editable={true} />
+          </div>
+
+          <aside className="w-48">
+            <div className="mb-4">
+              <label className="text-sm text-gray-500">Group</label>
+              <div className="mt-2">
+                <select
+                  value={groupId ?? ''}
+                  onChange={(e) => setGroupId(e.target.value ? parseInt(e.target.value) : null)}
+                  className="w-full border border-gray-200 rounded-md p-2"
+                >
+                  <option value="">Uncategorized</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>{g.title}</option>
+                  ))}
+                </select>
+                <div className="mt-2 text-xs text-gray-500">
+                  Select which group this page belongs to.
+                </div>
+                <div className="mt-3">
+                  <Link href="/admin/groups" className="text-sm text-blue-600 hover:underline">Manage groups</Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500">Created: will be set on save</div>
+            <div className="text-xs text-gray-500 mt-1">Updated: will be set on save</div>
+          </aside>
         </div>
-
-        <NotionEditor content={content} onChange={setContent} editable={true} />
       </main>
     </div>
   );
 }
-

@@ -35,13 +35,13 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const { slug, title, content_md } = await request.json();
+    const { slug, title, description, content_md, group_id } = await request.json();
 
     if (!slug || !title) {
       return NextResponse.json({ error: 'Slug and title are required' }, { status: 400 });
     }
 
-    const document = updateDocument(parseInt(id), slug, title, content_md || '');
+    const document = updateDocument(parseInt(id), slug, title, content_md || '', group_id ?? null, description ?? null);
 
     if (!document) {
       return NextResponse.json({ error: 'Document not found' }, { status: 404 });
@@ -80,4 +80,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete document' }, { status: 500 });
   }
 }
-
