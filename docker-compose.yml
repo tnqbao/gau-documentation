@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_SECRET=your-super-secret-key-change-in-production
+      - NEXTAUTH_URL=http://localhost:3000
+      - ADMIN_PASSWORD=admin123
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+# Environment Variables
+NEXTAUTH_SECRET=your-super-secret-key-change-in-production
+NEXTAUTH_URL=http://localhost:3000
+ADMIN_PASSWORD=admin123
+
