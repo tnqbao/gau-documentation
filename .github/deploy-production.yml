@@ -60,7 +60,5 @@ jobs:
 
           # Cleanup old images
           docker image prune -f
-
           echo "Deployment completed successfully!"
-          
           EOF
