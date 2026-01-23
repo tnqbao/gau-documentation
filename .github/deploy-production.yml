@@ -1,0 +1,66 @@
+name: production-deploy
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+
+      - name: Start Tailscale and authenticate
+        run: |
+          sudo tailscaled &
+          sleep 3
+          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTH_KEY }}
+          sleep 5
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy Docker container
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          sshpass -p "$SSHPASS" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+
+          # Navigate to project directory
+          cd /home/debian/gauas-documentation || mkdir -p /home/debian/gauas-documentation
+          cd /home/debian/gauas-documentation
+
+          # Pull latest image
+          docker pull iamqbao/gauas-documentation:latest
+
+          # Stop and remove old container
+          docker rm -f gauas-documentation || true
+
+          # Run new container
+          docker run -d \
+            --name gauas-documentation \
+            --env-file .env \
+            --network gauas-network \
+            -p 3000:3000 \
+            -v $(pwd)/data:/app/data \
+            -v $(pwd)/public/uploads:/app/public/uploads \
+            --restart unless-stopped \
+            iamqbao/gauas-documentation:latest
+
+          # Create network if not exists
+          docker network create gauas-network 2>/dev/null || true
+
+          # Cleanup old images
+          docker image prune -f
+
+          echo "Deployment completed successfully!"
+          
+          EOF

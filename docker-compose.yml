@@ -1,19 +1,45 @@
 version: '3.8'
 
 services:
-  web:
-    build: .
+  gauas-docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gauas-documentation
     ports:
       - "3000:3000"
     environment:
-      - NEXTAUTH_SECRET=your-super-secret-key-change-in-production
-      - NEXTAUTH_URL=http://localhost:3000
-      - ADMIN_PASSWORD=admin123
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped
-# Environment Variables
-NEXTAUTH_SECRET=your-super-secret-key-change-in-production
-NEXTAUTH_URL=http://localhost:3000
-ADMIN_PASSWORD=admin123
+      # NextAuth Configuration
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-super-secret-key-change-in-production}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
 
+      # Admin Password
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+
+      # Object Storage Configuration
+      - STORAGE_ACCESS_KEY=${STORAGE_ACCESS_KEY:-}
+      - STORAGE_SECRET_KEY=${STORAGE_SECRET_KEY:-}
+      - STORAGE_BUCKET_ID=${STORAGE_BUCKET_ID:-}
+      - STORAGE_API_URL=${STORAGE_API_URL:-https://api.gauas.online}
+
+    volumes:
+      # Persist SQLite database
+      - ./data:/app/data
+      # Persist uploaded files (if using local storage)
+      - ./public/uploads:/app/public/uploads
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    networks:
+      - gauas-network
+
+networks:
+  gauas-network:
+    driver: bridge
