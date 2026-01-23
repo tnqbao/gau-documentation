@@ -85,7 +85,7 @@ export default function CodeBlockComponent({ node, updateAttributes }: NodeViewP
 
         {/* Code content */}
         <pre className="bg-gray-900 text-gray-100 p-4 overflow-x-auto">
-          <NodeViewContent as="code" className="language-{language}" />
+          <NodeViewContent as="pre" className={`language-${language}`} />
         </pre>
       </div>
 
