@@ -35,14 +35,21 @@ jobs:
           sshpass -p "$SSHPASS" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
 
           # Navigate to project directory
-          cd /home/runner/gauas-documentation || mkdir -p /home/runner/gauas-documentation
-          cd /home/runner/gauas-documentation
+          cd /home/bao/gauas-documentation || mkdir -p /home/bao/gauas-documentation
+          cd /home/bao/gauas-documentation
+
+          # Create directories with proper permissions BEFORE pulling image
+          mkdir -p data public/uploads
+          chmod 755 data public/uploads
 
           # Pull latest image
           docker pull iamqbao/gauas-documentation:latest
 
           # Stop and remove old container
           docker rm -f gauas-documentation || true
+
+          # Create network if not exists
+          docker network create gauas-network 2>/dev/null || true
 
           # Run new container
           docker run -d \
@@ -55,8 +62,6 @@ jobs:
             --restart unless-stopped \
             iamqbao/gauas-documentation:latest
 
-          # Create network if not exists
-          docker network create gauas-network 2>/dev/null || true
 
           # Cleanup old images
           docker image prune -f
