@@ -31,8 +31,9 @@ jobs:
       - name: Deploy Docker container
         env:
           SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+          SUDO_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: |
-          sshpass -p "$SSHPASS" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          sshpass -p "$SSHPASS" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -s << EOF
 
           # Navigate to project directory
           cd /home/bao/gauas-documentation || mkdir -p /home/bao/gauas-documentation
@@ -40,8 +41,8 @@ jobs:
 
           # Create directories with proper ownership for nextjs user (uid 1001 in container)
           mkdir -p data public/uploads
-          echo "$SSHPASS" | sudo -S chown -R 1001:1001 data public/uploads
-          echo "$SSHPASS" | sudo -S chmod -R 755 data public/uploads
+          echo "$SUDO_PASSWORD" | sudo -S chown -R 1001:1001 data public/uploads 2>/dev/null
+          echo "$SUDO_PASSWORD" | sudo -S chmod -R 755 data public/uploads 2>/dev/null
 
           # Pull latest image
           docker pull iamqbao/gauas-documentation:latest
@@ -58,8 +59,8 @@ jobs:
             --env-file .env \
             --network gauas-network \
             -p 3000:3000 \
-            -v $(pwd)/data:/app/data \
-            -v $(pwd)/public/uploads:/app/public/uploads \
+            -v \$(pwd)/data:/app/data \
+            -v \$(pwd)/public/uploads:/app/public/uploads \
             --restart unless-stopped \
             iamqbao/gauas-documentation:latest
 
