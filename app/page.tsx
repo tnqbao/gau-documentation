@@ -13,38 +13,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="text-xl font-bold text-gray-900">Gauas Document</span>
-            </div>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                href="/docs/getting-started"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Documentation
-              </Link>
-              <Link
-                href="/admin"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Admin
-              </Link>
-              <Link
-                href="/admin/login"
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
-              >
-                Sign In
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="py-16 sm:py-24 lg:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -105,12 +73,16 @@ export default function HomePage() {
                       <div className="w-full h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center text-gray-400">No image</div>
                     )}
 
-                    <div className="w-full">
-                      <div className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors truncate">{group.title}</div>
-                      <div className="text-sm text-gray-500 mt-1">{docs.length} page{docs.length !== 1 ? 's' : ''}</div>
+                    <div className="w-full flex-1">
+                      <div className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors mb-2">{group.title}</div>
+                      {group.description ? (
+                        <p className="text-sm text-gray-600 line-clamp-2">{group.description}</p>
+                      ) : (
+                        <p className="text-sm text-gray-500">{docs.length} page{docs.length !== 1 ? 's' : ''}</p>
+                      )}
                     </div>
 
-                    <div className="mt-auto w-full text-right">
+                    <div className="mt-auto w-full flex justify-end">
                       <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                     </div>
                   </Link>
@@ -232,21 +204,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-gray-400" />
-              <span className="text-gray-600">Gau Documentation</span>
-            </div>
-            <p className="text-gray-500 text-sm">
-              Built with Next.js and Tiptap
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -26,9 +26,9 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const { slug, title, thumbnail } = await request.json();
+    const { slug, title, thumbnail, description } = await request.json();
     if (!slug || !title) return NextResponse.json({ error: 'Slug and title required' }, { status: 400 });
-    const g = updateGroup(parseInt(id), slug, title, thumbnail || null);
+    const g = updateGroup(parseInt(id), slug, title, thumbnail || null, description || null);
     if (!g) return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     return NextResponse.json(g);
   } catch (err) {
@@ -52,4 +52,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete group' }, { status: 500 });
   }
 }
-

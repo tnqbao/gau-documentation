@@ -19,15 +19,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { slug, title, thumbnail } = await request.json();
+    const { slug, title, thumbnail, description } = await request.json();
     if (!slug || !title) {
       return NextResponse.json({ error: 'Slug and title are required' }, { status: 400 });
     }
 
-    const group = createGroup(slug, title, thumbnail || null);
+    const group = createGroup(slug, title, thumbnail || null, description || null);
     return NextResponse.json(group, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to create group' }, { status: 500 });
   }
 }
-
