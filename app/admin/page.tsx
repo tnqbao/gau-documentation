@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdminFloatingBar from '@/components/AdminFloatingBar';
-import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload, Folder, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload, Folder, ChevronDown, ChevronRight, Settings } from 'lucide-react';
 
 interface Group {
   id: number;
@@ -198,6 +198,13 @@ export default function AdminDashboard() {
               <p className="text-gray-500">{documents.length} document{documents.length !== 1 ? 's' : ''} total</p>
             </div>
             <div className="flex items-center gap-3">
+              <Link
+                href="/admin/homepage"
+                className="flex items-center gap-2 px-5 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-sm"
+              >
+                <Settings size={20} />
+                <span>Edit Homepage</span>
+              </Link>
               <button
                 onClick={handleImportSitemap}
                 disabled={importing}
