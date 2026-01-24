@@ -174,6 +174,10 @@ export default function AdminDashboard() {
     return acc;
   }, {} as Record<string, { title: string; group: Group | null; documents: Document[] }>);
 
+  // Debug logging
+  console.log('Documents fetched:', documents.map(d => ({ id: d.id, title: d.title, group_id: d.group_id, group: d.group })));
+  console.log('Grouped documents:', groupedDocuments);
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">

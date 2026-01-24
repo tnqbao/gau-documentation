@@ -10,6 +10,7 @@ export default function NewGroupPage() {
   const router = useRouter();
   const [slug, setSlug] = useState('');
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -45,7 +46,7 @@ export default function NewGroupPage() {
       const res = await fetch('/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, title, thumbnail })
+        body: JSON.stringify({ slug, title, description, thumbnail })
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -81,6 +82,9 @@ export default function NewGroupPage() {
           <label className="block text-sm text-gray-600">Title</label>
           <input className="w-full border p-2 rounded-md mt-1 mb-4" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Gauas Cloud" />
 
+          <label className="block text-sm text-gray-600">Description</label>
+          <textarea className="w-full border p-2 rounded-md mt-1 mb-4" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A brief description of this group..." rows={3} />
+
           <label className="block text-sm text-gray-600">Thumbnail</label>
           <div className="mt-2 mb-4">
             {thumbnail ? (
@@ -105,4 +109,3 @@ export default function NewGroupPage() {
     </div>
   );
 }
-

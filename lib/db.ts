@@ -58,6 +58,10 @@ try {
     // If groups table exists but has no thumbnail column, try to add it
     db.exec("ALTER TABLE groups ADD COLUMN thumbnail TEXT");
   }
+  const hasDescription = cols.some(c => c.name === 'description');
+  if (!hasDescription) {
+    db.exec("ALTER TABLE groups ADD COLUMN description TEXT");
+  }
 } catch (e) {
   // ignore
 }
@@ -75,6 +79,7 @@ export interface Group {
   id: number;
   slug: string;
   title: string;
+  description?: string | null;
   thumbnail?: string | null;
   created_at: string;
   updated_at: string;
@@ -173,22 +178,22 @@ export function getGroupById(id: number): Group | undefined {
   return db.prepare('SELECT * FROM groups WHERE id = ?').get(id) as Group | undefined;
 }
 
-export function createGroup(slug: string, title: string, thumbnail?: string | null): Group {
+export function createGroup(slug: string, title: string, thumbnail?: string | null, description?: string | null): Group {
   const stmt = db.prepare(`
-    INSERT INTO groups (slug, title, thumbnail, created_at, updated_at)
-    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO groups (slug, title, description, thumbnail, created_at, updated_at)
+    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `);
-  const result = stmt.run(slug, title, thumbnail || null);
+  const result = stmt.run(slug, title, description || null, thumbnail || null);
   return getGroupById(result.lastInsertRowid as number)!;
 }
 
-export function updateGroup(id: number, slug: string, title: string, thumbnail?: string | null): Group | undefined {
+export function updateGroup(id: number, slug: string, title: string, thumbnail?: string | null, description?: string | null): Group | undefined {
   const stmt = db.prepare(`
     UPDATE groups
-    SET slug = ?, title = ?, thumbnail = ?, updated_at = CURRENT_TIMESTAMP
+    SET slug = ?, title = ?, description = ?, thumbnail = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
-  stmt.run(slug, title, thumbnail || null, id);
+  stmt.run(slug, title, description || null, thumbnail || null, id);
   return getGroupById(id);
 }
 
