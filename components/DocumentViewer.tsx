@@ -7,7 +7,6 @@ import { Edit, Save, X, ChevronLeft, ChevronRight, Calendar, Clock } from 'lucid
 import NotionEditor from './NotionEditor';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface DocumentViewerProps {
   document: Document;
@@ -27,6 +26,7 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
   const [content, setContent] = useState(document.content_md);
   const [displayHtml, setDisplayHtml] = useState(initialHtmlContent);
   const [isSaving, setIsSaving] = useState(false);
+
 
   const isAdmin = session?.user?.email === 'admin';
 
@@ -70,11 +70,12 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
     setIsEditing(false);
   };
 
+
   const breadcrumbs = document.slug.split('/').filter(Boolean);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Admin Floating Action Buttons */}
+      {/* Fixed Save/Cancel/Edit Buttons - Top Right */}
       {isAdmin && (
         <div className="fixed top-20 right-4 z-50 flex gap-2">
           {isEditing ? (
@@ -82,27 +83,27 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white text-sm sm:text-base rounded-xl shadow-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors shadow-lg disabled:opacity-50"
               >
-                <Save size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save'}</span>
+                <Save size={16} />
+                <span>{isSaving ? 'Saving...' : 'Save'}</span>
               </button>
               <button
                 onClick={handleCancel}
                 disabled={isSaving}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gray-600 text-white text-sm sm:text-base rounded-xl shadow-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors shadow-lg"
               >
-                <X size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden sm:inline">Cancel</span>
+                <X size={16} />
+                <span>Cancel</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-xl shadow-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
             >
-              <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden sm:inline">Edit</span>
+              <Edit size={16} />
+              <span>Edit</span>
             </button>
           )}
         </div>
@@ -110,15 +111,15 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 max-w-4xl py-8">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 max-w-5xl py-4 sm:py-8">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-6 text-sm overflow-x-auto">
-            <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6 text-sm overflow-x-auto pb-2">
+            <Link href="/" className="text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap">
               Home
             </Link>
             {breadcrumbs.map((crumb, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <ChevronRight size={14} className="text-gray-400" />
+              <div key={index} className="flex items-center gap-2 whitespace-nowrap">
+                <ChevronRight size={14} className="text-gray-400 flex-shrink-0" />
                 {index === breadcrumbs.length - 1 ? (
                   <span className="text-gray-900 font-medium">{crumb}</span>
                 ) : (
@@ -134,49 +135,53 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
           </div>
 
           {/* Document Header with Title and Description */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             {isEditing ? (
               <>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="text-3xl sm:text-4xl font-bold text-gray-900 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1 mb-2"
+                  className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1 mb-2"
                   placeholder="Document title"
                 />
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="text-lg text-gray-600 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1"
+                  className="text-base sm:text-lg text-gray-600 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1"
                   placeholder="Add a description..."
                 />
               </>
             ) : (
               <>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 leading-tight">{title}</h1>
                 {description && (
-                  <p className="text-lg text-gray-600">{description}</p>
+                  <p className="text-base sm:text-lg text-gray-600">{description}</p>
                 )}
               </>
             )}
           </div>
 
           {/* Document Metadata */}
-          <div className="mb-6 flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-500">
+          <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500">
             <div className="flex items-center gap-1.5">
-              <Calendar size={16} />
-              <span>Created: {new Date(document.created_at).toLocaleDateString('en-US', {
+              <Calendar size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Created: </span>
+              <span className="sm:hidden">Created </span>
+              <span>{new Date(document.created_at).toLocaleDateString('en-US', {
                 year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric'
               })}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock size={16} />
-              <span>Last updated: {new Date(document.updated_at).toLocaleDateString('en-US', {
+              <Clock size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Last updated: </span>
+              <span className="sm:hidden">Updated </span>
+              <span>{new Date(document.updated_at).toLocaleDateString('en-US', {
                 year: 'numeric',
-                month: 'long',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -185,7 +190,7 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
           </div>
 
           {/* Document Content */}
-          <article className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <article className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             {isEditing ? (
               <NotionEditor
                 content={content}
@@ -194,23 +199,23 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
               />
             ) : (
               <div
-                className="prose prose-base sm:prose-lg max-w-none
-                  p-6 sm:p-8
+                className="prose prose-sm sm:prose-base lg:prose-lg max-w-none
+                  p-4 sm:p-6 lg:p-8
                   prose-headings:font-bold prose-headings:text-gray-900 prose-headings:scroll-mt-20
-                  prose-h1:text-3xl prose-h1:sm:text-4xl prose-h1:mb-6
-                  prose-h2:text-2xl prose-h2:sm:text-3xl prose-h2:mt-10 prose-h2:mb-4
-                  prose-h3:text-xl prose-h3:sm:text-2xl prose-h3:mt-8 prose-h3:mb-3
-                  prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-                  prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                  prose-img:rounded-xl prose-img:max-w-full prose-img:h-auto prose-img:shadow-md
-                  prose-pre:bg-gray-900 prose-pre:rounded-xl prose-pre:overflow-x-auto prose-pre:text-sm prose-pre:p-4
-                  prose-code:text-pink-600 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-                  prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
-                  prose-ul:my-4 prose-ol:my-4 prose-li:my-1
-                  prose-table:w-full prose-table:overflow-x-auto prose-table:block prose-table:max-w-full
-                  prose-th:bg-gray-100 prose-th:p-3 prose-th:text-left
-                  prose-td:p-3 prose-td:border-t prose-td:border-gray-200
-                  prose-hr:my-8 prose-hr:border-gray-200"
+                  prose-h1:text-xl sm:prose-h1:text-2xl lg:prose-h1:text-3xl prose-h1:mb-4 sm:prose-h1:mb-6
+                  prose-h2:text-lg sm:prose-h2:text-xl lg:prose-h2:text-2xl prose-h2:mt-6 sm:prose-h2:mt-8 prose-h2:mb-3 sm:prose-h2:mb-4
+                  prose-h3:text-base sm:prose-h3:text-lg lg:prose-h3:text-xl prose-h3:mt-4 sm:prose-h3:mt-6 prose-h3:mb-2 sm:prose-h3:mb-3
+                  prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-3 sm:prose-p:mb-4 prose-p:text-sm sm:prose-p:text-base
+                  prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-a:break-words
+                  prose-img:rounded-lg sm:prose-img:rounded-xl prose-img:max-w-full prose-img:h-auto prose-img:shadow-md prose-img:mx-auto
+                  prose-pre:bg-gray-900 prose-pre:rounded-lg sm:prose-pre:rounded-xl prose-pre:overflow-x-auto prose-pre:text-xs sm:prose-pre:text-sm prose-pre:p-3 sm:prose-pre:p-4 prose-pre:w-full
+                  prose-code:text-pink-600 prose-code:bg-gray-100 prose-code:px-1 sm:prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs sm:prose-code:text-sm prose-code:break-words
+                  prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-2 prose-blockquote:px-3 sm:prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:text-sm sm:prose-blockquote:text-base
+                  prose-ul:my-3 sm:prose-ul:my-4 prose-ol:my-3 sm:prose-ol:my-4 prose-li:my-1 prose-li:text-sm sm:prose-li:text-base
+                  prose-table:w-full prose-table:overflow-x-auto prose-table:block prose-table:max-w-full prose-table:text-xs sm:prose-table:text-sm
+                  prose-th:bg-gray-100 prose-th:p-2 sm:prose-th:p-3 prose-th:text-left prose-th:text-xs sm:prose-th:text-sm
+                  prose-td:p-2 sm:prose-td:p-3 prose-td:border-t prose-td:border-gray-200 prose-td:text-xs sm:prose-td:text-sm
+                  prose-hr:my-6 sm:prose-hr:my-8 prose-hr:border-gray-200"
                 dangerouslySetInnerHTML={{ __html: displayHtml }}
               />
             )}
@@ -218,36 +223,36 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
 
           {/* Navigation between documents */}
           {adjacentDocs && (adjacentDocs.prev || adjacentDocs.next) && (
-            <div className="mt-12 grid grid-cols-2 gap-4">
+            <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {adjacentDocs.prev ? (
                 <Link
                   href={`/docs/${adjacentDocs.prev.slug}`}
-                  className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group"
+                  className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:border-blue-500 hover:shadow-md transition-all group order-2 sm:order-1"
                 >
-                  <ChevronLeft size={20} className="text-gray-400 group-hover:text-blue-600" />
+                  <ChevronLeft size={18} className="text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs text-gray-500 mb-1">Previous</div>
-                    <div className="font-medium text-gray-900 group-hover:text-blue-600 truncate">
+                    <div className="font-medium text-gray-900 group-hover:text-blue-600 truncate text-sm sm:text-base">
                       {adjacentDocs.prev.title}
                     </div>
                   </div>
                 </Link>
               ) : (
-                <div></div>
+                <div className="hidden sm:block"></div>
               )}
 
               {adjacentDocs.next ? (
                 <Link
                   href={`/docs/${adjacentDocs.next.slug}`}
-                  className="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all group text-right"
+                  className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white border border-gray-200 rounded-lg sm:rounded-xl hover:border-blue-500 hover:shadow-md transition-all group text-right order-1 sm:order-2"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-xs text-gray-500 mb-1">Next</div>
-                    <div className="font-medium text-gray-900 group-hover:text-blue-600 truncate">
+                    <div className="font-medium text-gray-900 group-hover:text-blue-600 truncate text-sm sm:text-base">
                       {adjacentDocs.next.title}
                     </div>
                   </div>
-                  <ChevronRight size={20} className="text-gray-400 group-hover:text-blue-600" />
+                  <ChevronRight size={18} className="text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
                 </Link>
               ) : null}
             </div>

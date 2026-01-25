@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { FileText, Settings, PenLine, Shield, Zap, ChevronRight, Folder } from 'lucide-react';
-import { getAllGroups, getDocumentsByGroupId, getAllDocuments } from '@/lib/db';
+import { FileText, Settings, PenLine, Shield, Zap, ChevronRight, Folder, ExternalLink as ExternalLinkIcon } from 'lucide-react';
+import { getAllExternalLinks, getAllDocuments } from '@/lib/db';
 import Image from 'next/image';
 
 export default function HomePage() {
-  const groups = getAllGroups();
+  const externalLinks = getAllExternalLinks();
   const allDocuments = getAllDocuments();
 
   // Debug: log để kiểm tra
-  console.log('Groups:', groups.map(g => ({ id: g.id, title: g.title })));
+  console.log('External Links:', externalLinks.map(l => ({ id: l.id, title: l.title, url: l.url })));
   console.log('All documents:', allDocuments.map(d => ({ title: d.title, group_id: d.group_id })));
 
   return (
@@ -43,51 +43,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Groups Section */}
-      {groups.length > 0 && (
+      {/* External Links Section */}
+      {externalLinks.length > 0 && (
         <section className="py-16 sm:py-24 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Browse Documentation Groups
+                Our Products
               </h2>
               <p className="text-lg text-gray-600">
-                Explore documentation categories
+                All our platforms and tools in one place
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groups.map(group => {
-                const docs = getDocumentsByGroupId(group.id);
-                return (
-                  <Link
-                    key={group.id}
-                    href={`/docs/${group.slug}`}
-                    className="flex flex-col items-start gap-3 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
-                  >
-                    {group.thumbnail ? (
-                      <div className="w-full h-40 bg-gray-100 rounded-md overflow-hidden mb-2">
-                        <Image src={group.thumbnail} alt={group.title} width={800} height={400} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-full h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center text-gray-400">No image</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {externalLinks.map(link => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-start gap-3 p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all group"
+                >
+                  {link.thumbnail ? (
+                    <div className="w-full h-40 bg-gray-100 rounded-md overflow-hidden mb-2">
+                      <Image src={link.thumbnail} alt={link.title} width={800} height={400} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-40 bg-gray-100 rounded-md mb-2 flex items-center justify-center text-gray-400">
+                      <ExternalLinkIcon size={48} />
+                    </div>
+                  )}
+
+                  <div className="w-full flex-1">
+                    <div className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors mb-2">{link.title}</div>
+                    {link.description && (
+                      <p className="text-sm text-gray-600 line-clamp-3">{link.description}</p>
                     )}
+                  </div>
 
-                    <div className="w-full flex-1">
-                      <div className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors mb-2">{group.title}</div>
-                      {group.description ? (
-                        <p className="text-sm text-gray-600 line-clamp-2">{group.description}</p>
-                      ) : (
-                        <p className="text-sm text-gray-500">{docs.length} page{docs.length !== 1 ? 's' : ''}</p>
-                      )}
-                    </div>
-
-                    <div className="mt-auto w-full flex justify-end">
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                  </Link>
-                );
-              })}
+                  <div className="mt-auto w-full flex justify-between items-center">
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <ExternalLinkIcon size={12} />
+                      External Link
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         </section>

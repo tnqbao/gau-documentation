@@ -56,7 +56,7 @@ export default function AdminGroupsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Groups</h1>
-            <p className="text-sm text-gray-500">Manage documentation groups and thumbnails</p>
+            <p className="text-sm text-gray-500">Manage documentation groups</p>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/admin/groups/new" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl">
@@ -76,9 +76,6 @@ export default function AdminGroupsPage() {
           <div className="bg-white rounded-xl border overflow-hidden">
             {groups.map((g: any) => (
               <div key={g.id} className="flex items-center gap-4 p-4 border-b last:border-b-0">
-                <div className="w-24 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                  {g.thumbnail ? <img src={g.thumbnail} alt={g.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>}
-                </div>
                 <div className="flex-1">
                   <div className="font-medium">{g.title}</div>
                   <div className="text-xs text-gray-500">/{g.slug}</div>

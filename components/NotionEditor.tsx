@@ -136,12 +136,15 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
   const [fontSize, setFontSizeValue] = useState('16');
   const [isDragging, setIsDragging] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ x: 20, y: 20 });
+  const [toolbarSize, setToolbarSize] = useState<{ width: number; height: number | 'auto' }>({ width: 350, height: 'auto' });
+  const [isResizing, setIsResizing] = useState<'horizontal' | 'vertical' | 'diagonal' | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [toolbarScale, setToolbarScale] = useState(1);
   const [isUploading, setIsUploading] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragStart = useRef({ x: 0, y: 0 });
+  const resizeStart = useRef({ x: 0, y: 0, width: 350, height: 0 });
 
   // Upload image to Object Storage
   const uploadImage = useCallback(async (file: File): Promise<string | null> => {
@@ -346,6 +349,19 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
     };
   };
 
+  // Handle resize start
+  const handleResizeStart = (e: React.MouseEvent, direction: 'horizontal' | 'vertical' | 'diagonal') => {
+    e.stopPropagation();
+    setIsResizing(direction);
+    const toolbarEl = toolbarRef.current;
+    resizeStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      width: toolbarEl?.offsetWidth || 350,
+      height: toolbarEl?.offsetHeight || 0,
+    };
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
@@ -353,14 +369,28 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
           x: e.clientX - dragStart.current.x,
           y: e.clientY - dragStart.current.y,
         });
+      } else if (isResizing) {
+        const deltaX = e.clientX - resizeStart.current.x;
+        const deltaY = e.clientY - resizeStart.current.y;
+
+        if (isResizing === 'horizontal' || isResizing === 'diagonal') {
+          const newWidth = Math.max(250, Math.min(800, resizeStart.current.width + deltaX));
+          setToolbarSize(prev => ({ ...prev, width: newWidth }));
+        }
+
+        if (isResizing === 'vertical' || isResizing === 'diagonal') {
+          const newHeight = Math.max(200, Math.min(800, resizeStart.current.height + deltaY));
+          setToolbarSize(prev => ({ ...prev, height: newHeight }));
+        }
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setIsResizing(null);
     };
 
-    if (isDragging) {
+    if (isDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       return () => {
@@ -368,7 +398,7 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, isResizing]);
 
   const addImage = useCallback(() => {
     const url = window.prompt('Enter image URL:');
@@ -461,6 +491,10 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
           style={{
             left: `${toolbarPosition.x}px`,
             top: `${toolbarPosition.y}px`,
+            width: `${toolbarSize.width}px`,
+            height: toolbarSize.height === 'auto' ? 'auto' : `${toolbarSize.height}px`,
+            maxHeight: toolbarSize.height === 'auto' ? 'none' : `${toolbarSize.height}px`,
+            overflowY: toolbarSize.height === 'auto' ? 'visible' : 'auto',
             cursor: isDragging ? 'grabbing' : 'default',
             transform: `scale(${toolbarScale})`,
             transformOrigin: 'top left',
@@ -486,18 +520,22 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
 
           {/* Toolbar Content */}
           {!isCollapsed && (
-            <div className="p-2 flex flex-col gap-2 max-w-xs">
-              {/* Row 1: Undo/Redo, Font, Size, Color */}
-              <div className="flex flex-wrap gap-1 items-center">
+            <div className="p-2 w-full overflow-y-auto" style={{ maxHeight: toolbarSize.height === 'auto' ? 'none' : `${(toolbarSize.height as number) - 50}px` }}>
+              <div className="flex flex-wrap gap-2 items-center w-full">
+                {/* Group 1: Undo/Redo */}
+                <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton onClick={() => editor.chain().focus().undo().run()} title="Undo">
                   <Undo size={16} />
                 </ToolButton>
                 <ToolButton onClick={() => editor.chain().focus().redo().run()} title="Redo">
                   <Redo size={16} />
                 </ToolButton>
+                </div>
 
-                <div className="w-px h-6 bg-gray-300 mx-1" />
+                <div className="w-px h-6 bg-gray-300" />
 
+                {/* Group 2: Font & Size */}
+                <div className="flex flex-wrap gap-1 items-center">
                 {/* Font Family */}
                 <div className="relative">
                   <button
@@ -581,10 +619,12 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                     </div>
                   )}
                 </div>
-              </div>
+                </div>
 
-              {/* Row 2: Text Formatting */}
-              <div className="flex flex-wrap gap-1">
+                <div className="w-px h-6 bg-gray-300" />
+
+              {/* Group 3: Text Formatting */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton
                   onClick={() => editor.chain().focus().toggleBold().run()}
                   isActive={editor.isActive('bold')}
@@ -629,8 +669,10 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                 </ToolButton>
               </div>
 
-              {/* Row 3: Headings */}
-              <div className="flex flex-wrap gap-1">
+              <div className="w-px h-6 bg-gray-300" />
+
+              {/* Group 4: Headings */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton
                   onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                   isActive={editor.isActive('heading', { level: 1 })}
@@ -668,8 +710,10 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                 </ToolButton>
               </div>
 
-              {/* Row 4: Lists & Alignment */}
-              <div className="flex flex-wrap gap-1">
+              <div className="w-px h-6 bg-gray-300" />
+
+              {/* Group 5: Lists */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton
                   onClick={() => editor.chain().focus().toggleBulletList().run()}
                   isActive={editor.isActive('bulletList')}
@@ -691,9 +735,12 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                 >
                   <Quote size={16} />
                 </ToolButton>
+              </div>
 
-                <div className="w-px h-6 bg-gray-300 mx-1" />
+              <div className="w-px h-6 bg-gray-300" />
 
+              {/* Group 6: Alignment */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton
                   onClick={() => editor.chain().focus().setTextAlign('left').run()}
                   isActive={editor.isActive({ textAlign: 'left' })}
@@ -717,8 +764,10 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                 </ToolButton>
               </div>
 
-              {/* Row 5: Insert */}
-              <div className="flex flex-wrap gap-1">
+              <div className="w-px h-6 bg-gray-300" />
+
+              {/* Group 7: Insert */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton onClick={addLink} isActive={editor.isActive('link')} title="Link">
                   <LinkIcon size={16} />
                 </ToolButton>
@@ -757,8 +806,10 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                 </ToolButton>
               </div>
 
-              {/* Row 6: Zoom */}
-              <div className="flex flex-wrap gap-1">
+              <div className="w-px h-6 bg-gray-300" />
+
+              {/* Group 8: Zoom */}
+              <div className="flex flex-wrap gap-1 items-center">
                 <ToolButton
                   onClick={() => {
                     setToolbarScale((prev) => Math.min(prev + 0.1, 2));
@@ -776,7 +827,34 @@ export default function NotionEditor({ content, onChange, editable = true }: Not
                   <ZoomOut size={16} />
                 </ToolButton>
               </div>
+              </div>
             </div>
+          )}
+
+          {/* Resize Handles */}
+          {!isCollapsed && (
+            <>
+              {/* Right edge - horizontal resize */}
+              <div
+                className="absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize bg-transparent hover:bg-blue-300 hover:opacity-50 transition-all"
+                onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
+                style={{ zIndex: 10 }}
+              />
+
+              {/* Bottom edge - vertical resize */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-1 cursor-ns-resize bg-transparent hover:bg-blue-300 hover:opacity-50 transition-all"
+                onMouseDown={(e) => handleResizeStart(e, 'vertical')}
+                style={{ zIndex: 10 }}
+              />
+
+              {/* Bottom-right corner - diagonal resize */}
+              <div
+                className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-gray-200 hover:bg-blue-300 transition-colors rounded-tl opacity-60 hover:opacity-100"
+                onMouseDown={(e) => handleResizeStart(e, 'diagonal')}
+                style={{ zIndex: 20 }}
+              />
+            </>
           )}
         </div>
       )}
