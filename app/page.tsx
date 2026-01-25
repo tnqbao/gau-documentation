@@ -3,6 +3,10 @@ import { FileText, Settings, PenLine, Shield, Zap, ChevronRight, Folder, Externa
 import { getAllExternalLinks, getAllDocuments } from '@/lib/db';
 import Image from 'next/image';
 
+// Force dynamic rendering - always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function HomePage() {
   const externalLinks = getAllExternalLinks();
   const allDocuments = getAllDocuments();
