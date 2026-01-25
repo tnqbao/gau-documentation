@@ -75,12 +75,37 @@ db.exec(`
   )
 `);
 
+// Tạo external_links table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS external_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    url TEXT NOT NULL,
+    thumbnail TEXT,
+    order_index INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 export interface Group {
   id: number;
   slug: string;
   title: string;
   description?: string | null;
   thumbnail?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExternalLink {
+  id: number;
+  title: string;
+  description?: string | null;
+  url: string;
+  thumbnail?: string | null;
+  order_index: number;
   created_at: string;
   updated_at: string;
 }
@@ -180,20 +205,20 @@ export function getGroupById(id: number): Group | undefined {
 
 export function createGroup(slug: string, title: string, thumbnail?: string | null, description?: string | null): Group {
   const stmt = db.prepare(`
-    INSERT INTO groups (slug, title, description, thumbnail, created_at, updated_at)
-    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO groups (slug, title, description, created_at, updated_at)
+    VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
   `);
-  const result = stmt.run(slug, title, description || null, thumbnail || null);
+  const result = stmt.run(slug, title, description || null);
   return getGroupById(result.lastInsertRowid as number)!;
 }
 
 export function updateGroup(id: number, slug: string, title: string, thumbnail?: string | null, description?: string | null): Group | undefined {
   const stmt = db.prepare(`
     UPDATE groups
-    SET slug = ?, title = ?, description = ?, thumbnail = ?, updated_at = CURRENT_TIMESTAMP
+    SET slug = ?, title = ?, description = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
-  stmt.run(slug, title, description || null, thumbnail || null, id);
+  stmt.run(slug, title, description || null, id);
   return getGroupById(id);
 }
 
@@ -219,3 +244,48 @@ export function adminExists(): boolean {
 }
 
 export default db;
+
+// External Links operations
+export function getAllExternalLinks(): ExternalLink[] {
+  return db.prepare('SELECT * FROM external_links ORDER BY order_index ASC, created_at ASC').all() as ExternalLink[];
+}
+
+export function getExternalLinkById(id: number): ExternalLink | null {
+  return db.prepare('SELECT * FROM external_links WHERE id = ?').get(id) as ExternalLink | null;
+}
+
+export function createExternalLink(data: Omit<ExternalLink, 'id' | 'created_at' | 'updated_at'>): ExternalLink {
+  const stmt = db.prepare(`
+    INSERT INTO external_links (title, description, url, thumbnail, order_index)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+  const result = stmt.run(data.title, data.description, data.url, data.thumbnail, data.order_index);
+  return getExternalLinkById(result.lastInsertRowid as number)!;
+}
+
+export function updateExternalLink(id: number, data: Partial<Omit<ExternalLink, 'id' | 'created_at' | 'updated_at'>>): ExternalLink | null {
+  const sets: string[] = [];
+  const values: any[] = [];
+
+  if (data.title !== undefined) { sets.push('title = ?'); values.push(data.title); }
+  if (data.description !== undefined) { sets.push('description = ?'); values.push(data.description); }
+  if (data.url !== undefined) { sets.push('url = ?'); values.push(data.url); }
+  if (data.thumbnail !== undefined) { sets.push('thumbnail = ?'); values.push(data.thumbnail); }
+  if (data.order_index !== undefined) { sets.push('order_index = ?'); values.push(data.order_index); }
+
+  if (sets.length === 0) return getExternalLinkById(id);
+
+  sets.push('updated_at = CURRENT_TIMESTAMP');
+  values.push(id);
+
+  const stmt = db.prepare(`UPDATE external_links SET ${sets.join(', ')} WHERE id = ?`);
+  stmt.run(...values);
+  return getExternalLinkById(id);
+}
+
+export function deleteExternalLink(id: number): boolean {
+  const stmt = db.prepare('DELETE FROM external_links WHERE id = ?');
+  const result = stmt.run(id);
+  return result.changes > 0;
+}
+

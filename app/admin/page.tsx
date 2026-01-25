@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdminFloatingBar from '@/components/AdminFloatingBar';
-import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload, Folder, ChevronDown, ChevronRight, Settings } from 'lucide-react';
+import { FileText, Plus, Trash2, ExternalLink, Clock, Download, Upload, Folder, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface Group {
   id: number;
@@ -197,41 +197,34 @@ export default function AdminDashboard() {
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Documents</h1>
               <p className="text-gray-500">{documents.length} document{documents.length !== 1 ? 's' : ''} total</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/admin/homepage"
-                className="flex items-center gap-2 px-5 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-sm"
-              >
-                <Settings size={20} />
-                <span>Edit Homepage</span>
-              </Link>
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleImportSitemap}
                 disabled={importing}
-                className="flex items-center gap-2 px-5 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm disabled:opacity-50"
               >
-                <Upload size={20} />
+                <Upload size={16} />
                 <span>{importing ? 'Importing...' : 'Import Sitemap'}</span>
               </button>
               <button
                 onClick={handleExportPagesMap}
-                className="flex items-center gap-2 px-5 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
               >
-                <Download size={20} />
+                <Download size={16} />
                 <span>Export Pages Map</span>
               </button>
               <Link
                 href="/admin/groups"
-                className="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
               >
-                <Folder size={20} />
+                <Folder size={16} />
                 <span>Manage Groups</span>
               </Link>
               <Link
                 href="/admin/documents/new"
-                className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
-                <Plus size={20} />
+                <Plus size={16} />
                 <span>New Document</span>
               </Link>
             </div>
