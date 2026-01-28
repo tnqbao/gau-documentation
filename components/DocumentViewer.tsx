@@ -2,11 +2,18 @@
 
 import { Document } from '@/lib/db';
 import { useSession } from 'next-auth/react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Edit, Save, X, ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
 import NotionEditor from './NotionEditor';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+interface Group {
+  id: number;
+  slug: string;
+  title: string;
+  thumbnail?: string | null;
+}
 
 interface DocumentViewerProps {
   document: Document;
@@ -26,9 +33,24 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
   const [content, setContent] = useState(document.content_md);
   const [displayHtml, setDisplayHtml] = useState(initialHtmlContent);
   const [isSaving, setIsSaving] = useState(false);
-
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<number | null>(document.group_id ?? null);
 
   const isAdmin = session?.user?.email === 'admin';
+
+  // Fetch groups when component mounts
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await fetch('/api/groups');
+        const data = await res.json();
+        setGroups(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to load groups', err);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -43,6 +65,7 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
           description: description,
           content_md: content,
           slug: document.slug,
+          group_id: groupId, // Use the state groupId which can be changed
         }),
       });
 
@@ -61,12 +84,13 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
     } finally {
       setIsSaving(false);
     }
-  }, [title, description, content, document, router]);
+  }, [title, description, content, groupId, document.id, document.slug, router]);
 
   const handleCancel = () => {
     setTitle(document.title);
     setDescription(document.description || '');
     setContent(document.content_md);
+    setGroupId(document.group_id ?? null);
     setIsEditing(false);
   };
 
@@ -149,9 +173,27 @@ export default function DocumentViewer({ document, htmlContent: initialHtmlConte
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="text-base sm:text-lg text-gray-600 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1"
+                  className="text-base sm:text-lg text-gray-600 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg px-2 py-1 mb-3"
                   placeholder="Add a description..."
                 />
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Group
+                  </label>
+                  <select
+                    value={groupId ?? ''}
+                    onChange={(e) => setGroupId(e.target.value ? parseInt(e.target.value) : null)}
+                    className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Uncategorized</option>
+                    {groups.map(g => (
+                      <option key={g.id} value={g.id}>{g.title}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select which group this document belongs to
+                  </p>
+                </div>
               </>
             ) : (
               <>
